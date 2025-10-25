@@ -18,4 +18,5 @@ export const registerUser = async ({ name, email, password }) => {
     body: JSON.stringify({ name, email, password }),
   });
   return res.json();
+  console.log("fhdhfjdf")
 };
