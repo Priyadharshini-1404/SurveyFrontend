@@ -10,11 +10,12 @@ export default function CardDetailsScreen({ navigation }) {
 
   const handlePayment = () => {
     alert('Payment Successful!');
-    navigation.navigate('Home'); // navigate back to home after payment
+    navigation.navigate('MainApp'); // navigate back to home after payment
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      
       <Text style={styles.title}>Enter Card Details</Text>
 
       <TextInput

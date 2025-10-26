@@ -26,7 +26,7 @@ export default function AboutUs({ navigation }) {
         Our team has the technical expertise, equipment and the technology to
         deliver the best solutions to our clients. Our company is known to be
         reliable, delivers projects on time and within an agreed budget, and
-        adheres to the highest ethical industry standards.
+        adheres to the highest ethical industry standards...
       </Text>
 
       <Text style={styles.title}>Our Corporate Philosophy</Text>
