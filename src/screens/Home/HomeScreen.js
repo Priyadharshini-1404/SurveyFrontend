@@ -20,9 +20,11 @@ const { width } = Dimensions.get("window");
 
 export default function HomeScreen({ navigation }) {
   const images = [
-    require("../../../assets/home.jpg"),
-    require("../../../assets/home2.jpg"),
-    require("../../../assets/home3.jpg"),
+    require("../../../assets/build1.jpg"),
+    require("../../../assets/land1.jpg"),
+    require("../../../assets/property.jpg"),
+    require("../../../assets/Property2.jpg"),
+    require("../../../assets/pipeline1.jpg")
   ];
 
   return (
@@ -54,7 +56,7 @@ export default function HomeScreen({ navigation }) {
         <View style={styles.sliderContainer}>
           <SwiperFlatList
             autoplay
-            autoplayDelay={3}
+            autoplayDelay={2}
             autoplayLoop
             index={0}
             showPagination
@@ -83,14 +85,14 @@ export default function HomeScreen({ navigation }) {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>My Surveys</Text>
           <View style={styles.buttonContainer}>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={styles.cardButton}
               onPress={() =>
                 navigation.navigate("Survey", { screen: "SurveyMain" })
               }
             >
               <Text style={styles.cardText}>My Surveys</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             <TouchableOpacity
               style={styles.cardButton}
@@ -99,12 +101,12 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.cardText}>Survey Request</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={styles.cardButton}
               onPress={() => navigation.navigate("Reports")}
             >
               <Text style={styles.cardText}>Reports</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             <TouchableOpacity
               style={styles.cardButton}

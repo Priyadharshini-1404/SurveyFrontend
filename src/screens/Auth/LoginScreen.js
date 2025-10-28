@@ -19,8 +19,18 @@ const handleLogin = async () => {
       return;
     }
 
-    // Navigate to HomeScreen
-navigation.replace("MainApp");
+    // ✅ Get survey data if passed from AppointmentScreen
+    const surveyData = navigation.getState()?.routes?.find(
+      r => r.name === "Login"
+    )?.params;
+
+    // ✅ After login, navigate to SurveyBookingScreen with survey details
+    navigation.replace("SurveyBookingScreen", {
+      surveyType: surveyData?.surveyType,
+      date: surveyData?.date,
+      time: surveyData?.time,
+      location: surveyData?.location,
+    });
 
   } catch (err) {
     alert(err.message);
@@ -28,6 +38,7 @@ navigation.replace("MainApp");
     setLoading(false);
   }
 };
+
 
   return (
     <View style={styles.container}>

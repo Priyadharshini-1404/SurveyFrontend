@@ -8,7 +8,7 @@ import SurveyStack from './SurveyStack'; // Assuming you have this stack
 import WalletScreen from '../screens/Wallet/WalletScreen';
 import ChatScreen from '../screens/Support/ChatScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
-
+import ScheduleScreen from '../screens/Survey/ScheduleScreen';
 const Tab = createBottomTabNavigator();
 
 // --- Bottom Tabs (Main App) ---
@@ -46,9 +46,7 @@ export default function AppTabs() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Survey" component={SurveyStack} />
-      <Tab.Screen name="Wallet" component={WalletScreen} />
-      <Tab.Screen name="Chat" component={ChatScreen} />
+      <Tab.Screen name="Survey" component={ScheduleScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

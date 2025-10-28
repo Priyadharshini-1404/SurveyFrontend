@@ -22,7 +22,7 @@ export default function SplashScreen({ navigation }) {
       {/* Get Started Button */}
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.replace('Login')}
+        onPress={() => navigation.replace('MainApp')}
       >
         <Text style={styles.buttonText}>Get Started</Text>
       </TouchableOpacity>

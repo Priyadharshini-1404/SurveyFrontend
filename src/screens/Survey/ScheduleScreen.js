@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,39 +9,52 @@ import {
   ScrollView,
   Alert,
   Platform,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import WalletScreen from '../Wallet/WalletScreen';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import WalletScreen from "../Wallet/WalletScreen";
 // Survey types
 const surveyTypes = [
-  "Property Survey", "Guideline Survey", "Land Survey", "Building Survey",
-  "Boundary Survey", "Topographical Survey", "Road and Bridge Survey",
-  "Pipeline Survey", "Airport Survey", "Leveling Survey", "Property Partition",
-  "Contour Survey", "Layout Survey"
+  "Property Survey",
+  "Guideline Survey",
+  "Land Survey",
+  "Building Survey",
+  "Boundary Survey",
+  "Topographical Survey",
+  "Road and Bridge Survey",
+  "Pipeline Survey",
+  "Airport Survey",
+  "Leveling Survey",
+  "Property Partition",
+  "Contour Survey",
+  "Layout Survey",
 ];
 
 // Example time slots
 const timeSlots = [
-  "09:00 AM", "10:30 AM", "12:00 PM",
-  "02:00 PM", "03:30 PM", "05:00 PM"
+  "09:00 AM",
+  "10:30 AM",
+  "12:00 PM",
+  "02:00 PM",
+  "03:30 PM",
+  "05:00 PM",
 ];
 
 const AppointmentScreen = ({ navigation }) => {
-  const [surveyType, setSurveyType] = useState('');
+  const [surveyType, setSurveyType] = useState("");
   const [showSurveyModal, setShowSurveyModal] = useState(false);
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [availableTime, setAvailableTime] = useState('');
+  const [availableTime, setAvailableTime] = useState("");
   const [showTimeModal, setShowTimeModal] = useState(false);
-  const [location, setLocation] = useState('');
-  const [notes, setNotes] = useState('');
+  const [location, setLocation] = useState("");
+  const [notes, setNotes] = useState("");
 
   // ✅ Date change handler
   const onChangeDate = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
-      const formattedDate = selectedDate.toISOString().split('T')[0];
+      const formattedDate = selectedDate.toISOString().split("T")[0];
       setDate(formattedDate);
     }
   };
@@ -49,22 +62,26 @@ const AppointmentScreen = ({ navigation }) => {
   // ✅ Confirm appointment logic
   const handleConfirm = () => {
     if (!surveyType || !date || !availableTime || !location) {
-      Alert.alert('Missing Fields', 'Please fill all required fields before confirming.');
+      Alert.alert(
+        "Missing Fields",
+        "Please fill all required fields before confirming."
+      );
       return;
     }
-
- Alert.alert(
+Alert.alert(
   "Advance Payment Required",
-  "You must pay an advance amount to confirm your survey appointment, Suppose after the Appoinment you cancel this survey the advance amount cant be refunded",
+  "You must pay an advance amount to confirm your survey appointment, Suppose after the Appointment you cancel this survey the advance amount can't be refunded and please Login",
   [
-    {
-      text: "Cancel",
-    //   Tab name is "Home"
-      style: "cancel",
-    },
+    { text: "Cancel", style: "cancel" },
     {
       text: "OK",
-      onPress: () => navigation.navigate("Wallet"), // Tab name is "Wallet"
+      onPress: () =>
+        navigation.navigate("Login", {
+          surveyType,
+          date,
+          time: availableTime,
+          location,
+        }),
     },
   ],
   { cancelable: false }
@@ -84,7 +101,7 @@ const AppointmentScreen = ({ navigation }) => {
           onPress={() => setShowSurveyModal(true)}
         >
           <Text style={styles.dropdownText}>
-            {surveyType || 'Choose Survey Type'}
+            {surveyType || "Choose Survey Type"}
           </Text>
         </TouchableOpacity>
 
@@ -105,7 +122,10 @@ const AppointmentScreen = ({ navigation }) => {
               ))}
               <TouchableOpacity onPress={() => setShowSurveyModal(false)}>
                 <Text
-                  style={[styles.modalItem, { color: 'red', textAlign: 'center' }]}
+                  style={[
+                    styles.modalItem,
+                    { color: "red", textAlign: "center" },
+                  ]}
                 >
                   Close
                 </Text>
@@ -120,8 +140,8 @@ const AppointmentScreen = ({ navigation }) => {
           style={styles.input}
           onPress={() => setShowDatePicker(true)}
         >
-          <Text style={{ fontSize: 16, color: date ? '#000' : '#999' }}>
-            {date || 'DD/MM/YYYY'}
+          <Text style={{ fontSize: 16, color: date ? "#000" : "#999" }}>
+            {date || "DD/MM/YYYY"}
           </Text>
         </TouchableOpacity>
 
@@ -135,13 +155,13 @@ const AppointmentScreen = ({ navigation }) => {
         )}
 
         {/* Time Slot */}
-        <Text style={styles.label}>Available Time Slot:</Text>
+        <Text style={styles.label}> Time Slot:</Text>
         <TouchableOpacity
           style={styles.dropdown}
           onPress={() => setShowTimeModal(true)}
         >
           <Text style={styles.dropdownText}>
-            {availableTime || 'Select Time Slot'}
+            {availableTime || "Select Time Slot"}
           </Text>
         </TouchableOpacity>
 
@@ -162,7 +182,10 @@ const AppointmentScreen = ({ navigation }) => {
               ))}
               <TouchableOpacity onPress={() => setShowTimeModal(false)}>
                 <Text
-                  style={[styles.modalItem, { color: 'red', textAlign: 'center' }]}
+                  style={[
+                    styles.modalItem,
+                    { color: "red", textAlign: "center" },
+                  ]}
                 >
                   Close
                 </Text>
@@ -191,10 +214,7 @@ const AppointmentScreen = ({ navigation }) => {
         />
 
         {/* Confirm Button */}
-        <TouchableOpacity
-          style={styles.confirmButton}
-          onPress={handleConfirm}
-        >
+        <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
           <Text style={styles.confirmText}>Confirm Appointment</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -205,24 +225,52 @@ const AppointmentScreen = ({ navigation }) => {
 export default AppointmentScreen;
 
 const styles = StyleSheet.create({
-  container: { padding: 20, flexGrow: 1, backgroundColor: '#fff' },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
+  container: { padding: 20, flexGrow: 1, backgroundColor: "#fff" },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
   label: { fontSize: 16, marginTop: 10, marginBottom: 5 },
   input: {
-    borderWidth: 1, borderColor: '#ccc', borderRadius: 8,
-    padding: 12, fontSize: 16, marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 10,
   },
-  dropdown: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12 },
-  dropdownText: { fontSize: 16, color: '#333' },
-  modalOverlay: { flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
-  modalContent: { margin: 30, backgroundColor: '#fff', borderRadius: 10, padding: 20 },
-  modalItem: { padding: 10, fontSize: 16, borderBottomWidth: 1, borderBottomColor: '#eee' },
+  dropdown: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 12,
+  },
+  dropdownText: { fontSize: 16, color: "#333" },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    margin: 30,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+  },
+  modalItem: {
+    padding: 10,
+    fontSize: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
   confirmButton: {
-    backgroundColor: '#1E90FF',
+    backgroundColor: "#1E90FF",
     padding: 15,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 15,
   },
-  confirmText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  confirmText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
 });

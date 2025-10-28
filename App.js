@@ -2,8 +2,6 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
 
 // Screens
 import SplashScreen from './src/screens/Auth/SplashScreen';
@@ -12,7 +10,7 @@ import AdminDashboard from './src/screens/Auth/AdminDashboard';
 import UserDashboard from './src/screens/Auth/UserDashboard';
 import RegisterScreen from './src/screens/Auth/RegisterScreen';
 import CardDetails from './src/screens/Wallet/CardDetails'
-import SurveyMain from './src/screens/Survey/SurveyMain';
+// import SurveyMain from './src/screens/Survey/SurveyMain';
 import RequestSurvey from './src/screens/Survey/RequestSurvey';
 import ScheduleScreen from './src/screens/Survey/ScheduleScreen';
 import DrawerNavigator from './src/navigations/DrawerNavigation';
@@ -21,6 +19,7 @@ import HomeScreen from './src/screens/Home/HomeScreen';
 // Auth Provider
 import { AuthProvider } from './src/auth/AuthContext';
 import WalletScreen from './src/screens/Wallet/WalletScreen';
+import SurveyBookingScreen from './src/screens/Survey/SurveyBookingScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -77,11 +76,12 @@ export default function App() {
               <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
               <Stack.Screen name="UserDashboard" component={UserDashboard} />
               
-              <Stack.Screen name="SurveyMain" component={SurveyMain} />
+              {/* <Stack.Screen name="SurveyMain" component={SurveyMain} /> */}
               <Stack.Screen name="RequestSurvey" component={RequestSurvey} />
               <Stack.Screen name="ScheduleScreen" component={ScheduleScreen} />
               <Stack.Screen name="Wallet" component={WalletScreen} />
               <Stack.Screen name="CardDetails" component={CardDetails}/>
+              <Stack.Screen name="SurveyBookingScreen" component={SurveyBookingScreen}/>
               <Stack.Screen name="Home" component={HomeScreen}/>
             </Stack.Navigator>
           </NavigationContainer>
