@@ -20,7 +20,7 @@ import HomeScreen from './src/screens/Home/HomeScreen';
 import { AuthProvider } from './src/auth/AuthContext';
 import WalletScreen from './src/screens/Wallet/WalletScreen';
 import SurveyBookingScreen from './src/screens/Survey/SurveyBookingScreen';
-
+import MapPickerScreen from './src/screens/Survey/MapPickerScreen';
 const Stack = createNativeStackNavigator();
 
 // ----------------------
@@ -75,7 +75,7 @@ export default function App() {
               <Stack.Screen name="MainApp" component={DrawerNavigator} />
               <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
               <Stack.Screen name="UserDashboard" component={UserDashboard} />
-              
+              <Stack.Screen name="MapPickerScreen" component={MapPickerScreen}/>
               {/* <Stack.Screen name="SurveyMain" component={SurveyMain} /> */}
               <Stack.Screen name="RequestSurvey" component={RequestSurvey} />
               <Stack.Screen name="ScheduleScreen" component={ScheduleScreen} />

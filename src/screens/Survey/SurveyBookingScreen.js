@@ -16,14 +16,21 @@ const SurveyBookingScreen = ({ route, navigation }) => {
   const [selectedStaff, setSelectedStaff] = useState(null);
 
   const surveyRate = "Based on Location";
-  const advanceAmount = 500;
+  const advanceAmount = 1;
 
   const handleConfirm = () => {
     if (!selectedStaff) {
       alert("Please select a staff before proceeding!");
       return;
     }
-    navigation.navigate("Wallet", { selectedStaff });
+navigation.navigate("Wallet", {
+  selectedStaff,
+  surveyType,
+  date,
+  time,
+  location,
+  notes: route.params?.notes || "",
+});
   };
 
   // Header + Details + Payment button all inside ListHeaderComponent

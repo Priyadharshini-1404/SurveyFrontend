@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,12 +8,12 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
-  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import WalletScreen from "../Wallet/WalletScreen";
-// Survey types
+import { useRoute, useFocusEffect, useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
+
 const surveyTypes = [
   "Property Survey",
   "Guideline Survey",
@@ -30,7 +30,6 @@ const surveyTypes = [
   "Layout Survey",
 ];
 
-// Example time slots
 const timeSlots = [
   "09:00 AM",
   "10:30 AM",
@@ -40,17 +39,28 @@ const timeSlots = [
   "05:00 PM",
 ];
 
-const AppointmentScreen = ({ navigation }) => {
+export default function AppointmentScreen() {
+  const navigation = useNavigation();
+  const route = useRoute();
+
   const [surveyType, setSurveyType] = useState("");
   const [showSurveyModal, setShowSurveyModal] = useState(false);
   const [date, setDate] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [availableTime, setAvailableTime] = useState("");
   const [showTimeModal, setShowTimeModal] = useState(false);
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState(""); // ✅ location added
   const [notes, setNotes] = useState("");
 
-  // ✅ Date change handler
+  // ✅ When coming back from MapPickerScreen
+  useFocusEffect(
+    useCallback(() => {
+      if (route.params?.selectedLocation) {
+        setLocation(route.params.selectedLocation);
+      }
+    }, [route.params])
+  );
+
   const onChangeDate = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
@@ -59,42 +69,29 @@ const AppointmentScreen = ({ navigation }) => {
     }
   };
 
-  // ✅ Confirm appointment logic
-  const handleConfirm = () => {
-    if (!surveyType || !date || !availableTime || !location) {
-      Alert.alert(
-        "Missing Fields",
-        "Please fill all required fields before confirming."
-      );
-      return;
-    }
-Alert.alert(
-  "Advance Payment Required",
-  "You must pay an advance amount to confirm your survey appointment, Suppose after the Appointment you cancel this survey the advance amount can't be refunded and please Login",
-  [
-    { text: "Cancel", style: "cancel" },
-    {
-      text: "OK",
-      onPress: () =>
-        navigation.navigate("Login", {
-          surveyType,
-          date,
-          time: availableTime,
-          location,
-        }),
-    },
-  ],
-  { cancelable: false }
-);
+ const handleConfirm = () => {
+  if (!surveyType || !date || !availableTime || !location) {
+    Alert.alert("Missing Fields", "Please fill all required fields.");
+    return;
+  }
 
-  };
+  // Navigate to staff selection screen instead of posting now
+  navigation.navigate("SurveyBookingScreen", {
+    surveyType,
+    date,
+    time: availableTime,
+    location,
+    notes,
+  });
+};
+
 
   return (
     <SafeAreaView>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Scheduled Survey</Text>
 
-        {/* Survey Type Dropdown */}
+        {/* Survey Type */}
         <Text style={styles.label}>Select Survey Type:</Text>
         <TouchableOpacity
           style={styles.dropdown}
@@ -121,14 +118,7 @@ Alert.alert(
                 </TouchableOpacity>
               ))}
               <TouchableOpacity onPress={() => setShowSurveyModal(false)}>
-                <Text
-                  style={[
-                    styles.modalItem,
-                    { color: "red", textAlign: "center" },
-                  ]}
-                >
-                  Close
-                </Text>
+                <Text style={[styles.modalItem, { color: "red" }]}>Close</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -155,7 +145,7 @@ Alert.alert(
         )}
 
         {/* Time Slot */}
-        <Text style={styles.label}> Time Slot:</Text>
+        <Text style={styles.label}> Time:</Text>
         <TouchableOpacity
           style={styles.dropdown}
           onPress={() => setShowTimeModal(true)}
@@ -165,7 +155,7 @@ Alert.alert(
           </Text>
         </TouchableOpacity>
 
-        {/* Time Slot Modal */}
+        {/* Time Modal */}
         <Modal visible={showTimeModal} transparent animationType="fade">
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
@@ -181,27 +171,28 @@ Alert.alert(
                 </TouchableOpacity>
               ))}
               <TouchableOpacity onPress={() => setShowTimeModal(false)}>
-                <Text
-                  style={[
-                    styles.modalItem,
-                    { color: "red", textAlign: "center" },
-                  ]}
-                >
-                  Close
-                </Text>
+                <Text style={[styles.modalItem, { color: "red" }]}>Close</Text>
               </TouchableOpacity>
             </View>
           </View>
         </Modal>
 
-        {/* Location */}
+        {/* ✅ Location (Navigate to Map Picker) */}
         <Text style={styles.label}>Site Location:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your location"
-          value={location}
-          onChangeText={setLocation}
-        />
+        <View style={styles.locationContainer}>
+          <TextInput
+            style={[styles.input, { flex: 1 }]}
+            placeholder="Select Location"
+            value={location}
+            editable={true}
+          />
+          <TouchableOpacity
+            style={styles.locationIcon}
+            onPress={() => navigation.navigate("MapPickerScreen", { from: "ScheduleScreen" })}
+          >
+            <Ionicons name="location-sharp" size={24} color="#007AFF" />
+          </TouchableOpacity>
+        </View>
 
         {/* Notes */}
         <Text style={styles.label}>Additional Notes:</Text>
@@ -215,14 +206,12 @@ Alert.alert(
 
         {/* Confirm Button */}
         <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
-          <Text style={styles.confirmText}>Confirm Appointment</Text>
+          <Text style={styles.confirmText}>Please Select Staff</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
-};
-
-export default AppointmentScreen;
+}
 
 const styles = StyleSheet.create({
   container: { padding: 20, flexGrow: 1, backgroundColor: "#fff" },
@@ -240,6 +229,13 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     marginBottom: 10,
+  },
+  locationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  locationIcon: {
+    marginLeft: 10,
   },
   dropdown: {
     borderWidth: 1,

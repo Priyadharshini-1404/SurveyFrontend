@@ -6,7 +6,6 @@ import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/Home/HomeScreen';
 import SurveyStack from './SurveyStack'; // Assuming you have this stack
 import WalletScreen from '../screens/Wallet/WalletScreen';
-import ChatScreen from '../screens/Support/ChatScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 import ScheduleScreen from '../screens/Survey/ScheduleScreen';
 const Tab = createBottomTabNavigator();

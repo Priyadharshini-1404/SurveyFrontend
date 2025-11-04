@@ -8,10 +8,30 @@ export default function CardDetailsScreen({ navigation }) {
   const [expiry, setExpiry] = useState('');
   const [cvv, setCvv] = useState('');
 
-  const handlePayment = () => {
-    alert('Payment Successful!');
-    navigation.navigate('MainApp'); // navigate back to home after payment
-  };
+const handlePayment = async () => {
+  try {
+    const res = await fetch("http://192.168.1.10:5000/api/payments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userName: "John Doe", // you can pass from params or context
+        surveyId: "SRV001",
+        amount: 1500,
+        surveyType: "Land Survey",
+        paymentType: "Credit / Debit Card",
+        cardNumber,
+      }),
+    });
+
+    const data = await res.json();
+    alert(data.message);
+    navigation.navigate("MainApp");
+  } catch (error) {
+    console.error(error);
+    alert("Payment failed");
+  }
+};
+
 
   return (
     <SafeAreaView style={styles.container}>

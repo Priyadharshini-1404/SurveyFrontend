@@ -1,158 +1,315 @@
-// src/screens/SurveyRequest.js
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, TouchableOpacity, Modal, StyleSheet, ScrollView, Alert, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import DateTimePicker from '@react-native-community/datetimepicker';
+// src/screens/RequestSurvey.js
+import React, { useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ScrollView,
+  Modal,
+  FlatList,
+  Platform,
+} from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 
-const surveyTypes = [
-  "Property Survey","Guideline Surveys","Land Survey","Building Survey",
-  "Boundary Survey","Topographical Survey","Road and Bridge Surveys",
-  "Pipeline Surveys","Airport Surveys","Leveling Surveys","Property Partition",
-  "Topo Survey","Contour Surveys","Building Settings out and Grid Line marking",
-  "Layout design and Stone Fixing","Layout Survey"
-];
+export default function RequestSurvey() {
+  const navigation = useNavigation();
+  const route = useRoute();
 
-const RequestSurvey = ({navigation}) => {
-  const [surveyType, setSurveyType] = useState('');
-  const [showSurveyModal, setShowSurveyModal] = useState(false);
-  const [location, setLocation] = useState('');
-  const [surveyDate, setSurveyDate] = useState('');
+  const [name, setName] = useState("");
+  const [surveyType, setSurveyType] = useState("");
+  const [location, setLocation] = useState("");
+  const [contact, setContact] = useState("");
+  const [surveyDate, setSurveyDate] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [additionalInfo, setAdditionalInfo] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const handleSurveySelect = (type) => {
-    setSurveyType(type);
-    setShowSurveyModal(false);
-  };
+  // ✅ Survey type options
+  const surveyOptions = [
+    "Property Survey",
+    "Guideline Survey",
+    "Land Survey",
+    "Building Survey",
+    "Boundary Survey",
+    "Topographical Survey",
+    "Road and Bridge Surveys",
+    "Pipeline Surveys",
+    "Airport Surveys",
+    "Leveling Surveys",
+    "Property Partition",
+    "Contour Surveys",
+    "Building Settings out and Grid Line marking",
+    "Layout design and Stone Fixing",
+    "Layout Survey",
+  ];
 
-  const handleSubmit = () => {
-    if (!surveyType || !location || !surveyDate) {
-      Alert.alert('Error', 'Please fill in all required fields');
-      return;
-    }
+  // ✅ Keep location when coming back from MapPicker
+  useFocusEffect(
+    useCallback(() => {
+      if (route.params?.selectedLocation) {
+        setLocation(route.params.selectedLocation);
+      }
+    }, [route.params])
+  );
 
-    const surveyData = { surveyType, location, surveyDate, additionalInfo };
-    console.log('Survey Submitted:', surveyData);
-    Alert.alert('Success', 'Survey request submitted!');
-
-    // Clear the form
-    setSurveyType('');
-    setLocation('');
-    setSurveyDate('');
-    setAdditionalInfo('');
-  };
-
-  const handleCancel = () => {
-    setSurveyType('');
-    setLocation('');
-    setSurveyDate('');
-    setAdditionalInfo('');
-  };
-
-  const onChangeDate = (event, selectedDate) => {
-    setShowDatePicker(Platform.OS === 'ios'); // keep open for iOS
+  // ✅ Handle date change
+  const handleDateChange = (event, selectedDate) => {
+    setShowDatePicker(false);
     if (selectedDate) {
-      const formattedDate = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD
+      const formattedDate = selectedDate.toISOString().split("T")[0];
       setSurveyDate(formattedDate);
     }
   };
 
+  // ✅ Handle form submission (saves to backend)
+  const handleSubmit = async () => {
+    if (!name || !surveyType || !location || !contact || !surveyDate) {
+      Alert.alert("Error", "Please fill all fields before submitting.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://192.168.1.10:5000/api/surveys", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          surveyType,
+          location,
+          contact,
+          surveyDate,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert("Success", "Survey request submitted successfully!", [
+          { text: "OK", onPress: () => navigation.navigate("Home") },
+        ]);
+
+        // Clear form fields
+        setName("");
+        setSurveyType("");
+        setLocation("");
+        setContact("");
+        setSurveyDate("");
+      } else {
+        Alert.alert("Error", data.message || "Failed to submit survey.");
+      }
+    } catch (error) {
+      console.error("Submit error:", error);
+      Alert.alert("Network Error", "Could not connect to the server.");
+    }
+  };
+
   return (
-    <SafeAreaView>
-      <ScrollView contentContainerStyle={styles.container}>
-         <TouchableOpacity
-                onPress={() => navigation.navigate('MainApp')}
-                style={styles.backButton}
-              >
-                <Ionicons name="arrow-back" size={26} color="#0e0f0fff" />
-              </TouchableOpacity>
-        
-        <Text style={styles.title}>Request a Survey</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.header}>Request a New Survey</Text>
 
-        <Text style={styles.label}>Survey Type:</Text>
-        <TouchableOpacity style={styles.dropdown} onPress={() => setShowSurveyModal(true)}>
-          <Text style={styles.dropdownText}>
-            {surveyType || 'Choose Survey Type'}
-          </Text>
-        </TouchableOpacity>
+      {/* Name Input */}
+      <TextInput
+        style={styles.input}
+        placeholder="Your Name"
+        value={name}
+        onChangeText={setName}
+      />
 
-        {/* Survey Type Modal */}
-        <Modal visible={showSurveyModal} transparent animationType="fade">
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              {surveyTypes.map((type) => (
-                <TouchableOpacity key={type} onPress={() => handleSurveySelect(type)}>
-                  <Text style={styles.modalItem}>{type}</Text>
+      {/* Survey Type Dropdown */}
+      <TouchableOpacity
+        style={styles.dropdownButton}
+        onPress={() => setModalVisible(true)}
+      >
+        <Text style={styles.dropdownText}>
+          {surveyType || "Select Survey Type"}
+        </Text>
+        <Ionicons name="chevron-down" size={20} color="#555" />
+      </TouchableOpacity>
+
+      {/* Modal Dropdown */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Choose Survey Type</Text>
+
+            <FlatList
+              data={surveyOptions}
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.modalItem}
+                  onPress={() => {
+                    setSurveyType(item);
+                    setModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.modalItemText}>{item}</Text>
                 </TouchableOpacity>
-              ))}
-              <TouchableOpacity onPress={() => setShowSurveyModal(false)}>
-                <Text style={[styles.modalItem, { color: 'red', textAlign: 'center' }]}>Close</Text>
-              </TouchableOpacity>
-            </View>
+              )}
+            />
+
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.modalCloseText}>Cancel</Text>
+            </TouchableOpacity>
           </View>
-        </Modal>
+        </View>
+      </Modal>
 
-        <Text style={styles.label}>Location:</Text>
+      {/* Location Selector */}
+      <View style={styles.locationContainer}>
         <TextInput
-          style={styles.input}
-          placeholder="Enter location"
+          style={[styles.input, { flex: 1 }]}
+          placeholder="Select Location"
           value={location}
-          onChangeText={setLocation}
+          editable={true}
         />
-
-        <Text style={styles.label}>Survey Date:</Text>
-        <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
-          <Text style={{ fontSize: 16, color: surveyDate ? '#000' : '#999' }}>
-            {surveyDate || 'Select Survey Date'}
-          </Text>
+        <TouchableOpacity
+          style={styles.locationIcon}
+          onPress={() =>
+            navigation.navigate("MapPickerScreen", { from: "RequestSurvey" })
+          }
+        >
+          <Ionicons name="location-sharp" size={24} color="#007AFF" />
         </TouchableOpacity>
+      </View>
+
+      {/* Date Picker */}
+      <TouchableOpacity
+        style={styles.input}
+        onPress={() => setShowDatePicker(true)}
+      >
+        <Text style={{ fontSize: 16, color: surveyDate ? "#000" : "#999" }}>
+          {surveyDate || "Select Survey Date"}
+        </Text>
+      </TouchableOpacity>
 
       {showDatePicker && (
-  <DateTimePicker
-    value={surveyDate ? new Date(surveyDate) : new Date()}
-    mode="date"
-    display="default"
-    onChange={onChangeDate}
-  />
-)}
-
-
-        <Text style={styles.label}>Additional Info:</Text>
-        <TextInput
-          style={[styles.input, { height: 100 }]}
-          placeholder="Enter additional info"
-          value={additionalInfo}
-          onChangeText={setAdditionalInfo}
-          multiline
+        <DateTimePicker
+          value={surveyDate ? new Date(surveyDate) : new Date()}
+          mode="date"
+          display="default"
+          onChange={handleDateChange}
         />
+      )}
 
-        <View style={styles.buttonContainer}>
-          <Button title="Submit" onPress={handleSubmit} color="#4CAF50" />
-          <View style={{ height: 10 }} />
-          <Button title="Cancel" onPress={handleCancel} color="#f44336" />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      {/* Contact Input */}
+      <TextInput
+        style={styles.input}
+        placeholder="Contact Number"
+        keyboardType="phone-pad"
+        value={contact}
+        onChangeText={setContact}
+      />
+
+      {/* Submit Button */}
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <Text style={styles.buttonText}>Submit Request</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: { padding: 20, flexGrow: 1, backgroundColor: '#fff' },
-  backButton: {
+  container: {
+    padding: 20,
+    backgroundColor: "#fff",
+    flexGrow: 1,
+  },
+  header: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
+    fontSize: 16,
+  },
+  dropdownButton: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
+    justifyContent: "space-between",
   },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, alignSelf: 'center' },
-  label: { fontSize: 16, marginTop: 10, marginBottom: 5 },
-  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, justifyContent: 'center' },
-  buttonContainer: { marginTop: 20 },
-  dropdown: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, marginTop: 5 },
-  dropdownText: { fontSize: 16, color: '#333' },
-  modalOverlay: { flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
-  modalContent: { margin: 30, backgroundColor: '#fff', borderRadius: 10, padding: 20 },
-  modalItem: { padding: 10, fontSize: 16, borderBottomWidth: 1, borderBottomColor: '#eee' },
+  dropdownText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  locationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  locationIcon: {
+    marginLeft: 10,
+  },
+  button: {
+    backgroundColor: "#007AFF",
+    paddingVertical: 15,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    width: "85%",
+    borderRadius: 10,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  modalItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderColor: "#eee",
+  },
+  modalItemText: {
+    fontSize: 16,
+    textAlign: "center",
+  },
+  modalCloseButton: {
+    marginTop: 10,
+    backgroundColor: "#007AFF",
+    borderRadius: 8,
+    padding: 10,
+  },
+  modalCloseText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "600",
+  },
 });
-
-export default RequestSurvey;
