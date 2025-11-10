@@ -73,7 +73,7 @@ export default function RequestSurvey() {
     }
 
     try {
-      const response = await fetch("http://192.168.1.10:5000/api/surveys", {
+      const response = await fetch("http://192.168.1.9:5000/api/surveys", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -43,16 +43,18 @@ export default function AppointmentScreen() {
   const navigation = useNavigation();
   const route = useRoute();
 
+  const [userName, setUserName] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
   const [surveyType, setSurveyType] = useState("");
   const [showSurveyModal, setShowSurveyModal] = useState(false);
   const [date, setDate] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [availableTime, setAvailableTime] = useState("");
   const [showTimeModal, setShowTimeModal] = useState(false);
-  const [location, setLocation] = useState(""); // ✅ location added
+  const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
 
-  // ✅ When coming back from MapPickerScreen
+  // ✅ When returning from MapPickerScreen
   useFocusEffect(
     useCallback(() => {
       if (route.params?.selectedLocation) {
@@ -69,27 +71,49 @@ export default function AppointmentScreen() {
     }
   };
 
- const handleConfirm = () => {
-  if (!surveyType || !date || !availableTime || !location) {
-    Alert.alert("Missing Fields", "Please fill all required fields.");
-    return;
-  }
+  // ✅ Confirm appointment details
+  const handleConfirm = () => {
+    if (!userName || !contactNumber || !surveyType || !date || !availableTime || !location) {
+      Alert.alert("Missing Fields", "Please fill all required fields.");
+      return;
+    }
 
-  // Navigate to staff selection screen instead of posting now
-  navigation.navigate("SurveyBookingScreen", {
-    surveyType,
-    date,
-    time: availableTime,
-    location,
-    notes,
-  });
-};
-
+    // ✅ Navigate to SurveyBookingScreen with collected info
+    navigation.navigate("SurveyBookingScreen", {
+      userName,
+      contactNumber,
+      surveyType,
+      date,
+      time: availableTime,
+      location,
+      notes,
+    });
+  };
 
   return (
     <SafeAreaView>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Scheduled Survey</Text>
+
+        {/* ✅ User Name */}
+        <Text style={styles.label}>Full Name:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your name"
+          value={userName}
+          onChangeText={setUserName}
+        />
+
+        {/* ✅ Contact Number */}
+        <Text style={styles.label}>Contact Number:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your phone number"
+          keyboardType="phone-pad"
+          maxLength={10}
+          value={contactNumber}
+          onChangeText={setContactNumber}
+        />
 
         {/* Survey Type */}
         <Text style={styles.label}>Select Survey Type:</Text>
@@ -145,7 +169,7 @@ export default function AppointmentScreen() {
         )}
 
         {/* Time Slot */}
-        <Text style={styles.label}> Time:</Text>
+        <Text style={styles.label}>Time:</Text>
         <TouchableOpacity
           style={styles.dropdown}
           onPress={() => setShowTimeModal(true)}
@@ -177,7 +201,7 @@ export default function AppointmentScreen() {
           </View>
         </Modal>
 
-        {/* ✅ Location (Navigate to Map Picker) */}
+        {/* ✅ Location Picker */}
         <Text style={styles.label}>Site Location:</Text>
         <View style={styles.locationContainer}>
           <TextInput
@@ -188,7 +212,9 @@ export default function AppointmentScreen() {
           />
           <TouchableOpacity
             style={styles.locationIcon}
-            onPress={() => navigation.navigate("MapPickerScreen", { from: "ScheduleScreen" })}
+            onPress={() =>
+              navigation.navigate("MapPickerScreen", { from: "ScheduleScreen" })
+            }
           >
             <Ionicons name="location-sharp" size={24} color="#007AFF" />
           </TouchableOpacity>
@@ -234,9 +260,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  locationIcon: {
-    marginLeft: 10,
-  },
+  locationIcon: { marginLeft: 10 },
   dropdown: {
     borderWidth: 1,
     borderColor: "#ddd",

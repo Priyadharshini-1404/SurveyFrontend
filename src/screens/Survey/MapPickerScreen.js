@@ -27,7 +27,8 @@ useEffect(() => {
     try {
       setLoading(true);
       console.log("Requesting location permissions...");
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      const { status } = await Location.requestForegroundPermissionsAsync();
+
       if (status !== "granted") {
         Alert.alert("Permission Denied", "Please enable location services.");
         setLoading(false);
@@ -35,17 +36,23 @@ useEffect(() => {
       }
 
       console.log("Fetching current location...");
-      const location = await Location.getCurrentPositionAsync({
+      let location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Highest,
         maximumAge: 10000,
         timeout: 20000,
+      }).catch(async () => {
+        console.warn("Primary location failed. Using last known position...");
+        return await Location.getLastKnownPositionAsync();
       });
 
-      console.log("Location fetched:", location.coords);
+      if (!location) throw new Error("Current location unavailable");
+
       const userLocation = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
       };
+
+      console.log("Location fetched:", userLocation);
 
       setSelectedLocation(userLocation);
       mapRef.current?.animateToRegion({
@@ -74,6 +81,7 @@ useEffect(() => {
     }
   })();
 }, []);
+
 
 
   // ✅ Convert coordinates to human-readable address

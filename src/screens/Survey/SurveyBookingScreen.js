@@ -12,7 +12,17 @@ import { Ionicons } from "@expo/vector-icons";
 import { staffList } from "../../data/staffData";
 
 const SurveyBookingScreen = ({ route, navigation }) => {
-  const { surveyType = "", date = "", time = "", location = "" } = route?.params || {};
+  // ✅ Extract all params safely here
+  const {
+    userName = "",
+    contactNumber = "",
+    surveyType = "",
+    date = "",
+    time = "",
+    location = "",
+    notes = "",
+  } = route?.params || {};
+
   const [selectedStaff, setSelectedStaff] = useState(null);
 
   const surveyRate = "Based on Location";
@@ -23,17 +33,20 @@ const SurveyBookingScreen = ({ route, navigation }) => {
       alert("Please select a staff before proceeding!");
       return;
     }
-navigation.navigate("Wallet", {
-  selectedStaff,
-  surveyType,
-  date,
-  time,
-  location,
-  notes: route.params?.notes || "",
-});
+
+    // ✅ Pass all params to WalletScreen
+    navigation.navigate("Wallet", {
+      userName,
+      contactNumber,
+      selectedStaff,
+      surveyType,
+      date,
+      time,
+      location,
+      notes,
+    });
   };
 
-  // Header + Details + Payment button all inside ListHeaderComponent
   const renderHeader = () => (
     <View style={{ padding: 20 }}>
       <Text style={styles.title}>Survey Booking Details</Text>
@@ -41,6 +54,8 @@ navigation.navigate("Wallet", {
       {/* Survey Info */}
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>📋 Survey Information</Text>
+        <Text style={styles.detail}>User Name: {userName}</Text>
+        <Text style={styles.detail}>Contact No: {contactNumber}</Text>
         <Text style={styles.detail}>Type: {surveyType}</Text>
         <Text style={styles.detail}>Date: {date}</Text>
         <Text style={styles.detail}>Time: {time}</Text>
@@ -56,7 +71,6 @@ navigation.navigate("Wallet", {
         </Text>
       </View>
 
-      {/* Staff Section Title */}
       <View style={{ marginBottom: 10 }}>
         <Text style={styles.sectionTitle}>👷 Choose Registered Staff</Text>
       </View>

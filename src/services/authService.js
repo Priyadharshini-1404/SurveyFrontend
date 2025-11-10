@@ -1,6 +1,6 @@
 
 // src/services/authService.js
-const API_URL = 'http://192.168.1.10:5000/api/auth'; // PC's LAN IP
+const API_URL = 'http://192.168.1.9:5000/api/auth'; // PC's LAN IP
 
 export const loginUser = async (email, password) => {
   const res = await fetch(`${API_URL}/login`, {

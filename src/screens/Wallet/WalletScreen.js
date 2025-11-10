@@ -7,36 +7,38 @@ import {
   StyleSheet,
   Modal,
   Alert,
-  Platform,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import UpiPayment from "react-native-upi-payment";
 
 export default function WalletScreen({ route, navigation }) {
-  const { selectedStaff, surveyType, date, time, location, notes } =
+  const { selectedStaff, surveyType, date, time, location, notes, userName, contactNumber } =
     route.params || {};
 
   const [paymentType, setPaymentType] = useState("");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const advanceAmount = 10;
-  const userName = "John Doe";
-  const surveyId = "SURV001";
   const amount = advanceAmount;
 
-  // ✅ Send payment details to backend
+  // ✅ Updated handleSubmit (removed surveyId)
   const handleSubmit = async (paymentStatus = "Success") => {
     try {
-      const res = await fetch("http://192.168.1.10:5000/api/payments", {
+      const res = await fetch("http://192.168.1.9:5000/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userName,
-          surveyId,
+          userName, // from route.params
+          contactNumber,
           amount,
           surveyType,
           paymentType,
           paymentStatus,
+          selectedStaff: selectedStaff?.name || "",
+          date,
+          time,
+          location,
+          notes,
         }),
       });
 
@@ -49,68 +51,71 @@ export default function WalletScreen({ route, navigation }) {
     }
   };
 
-  // ✅ UPI auto-detection payment handler
-  const handleGPayPayment = () => {
-    if (Platform.OS !== "android") {
-      Alert.alert("UPI not supported", "This feature works only on Android");
-      return;
-    }
+  // ✅ Handle UPI payment
+  const handleGPayPayment = async () => {
+    const upiId = "priyasan170594@axl"; // replace if needed
+    const name = "SurveyServices";
+    const note = "Survey Advance Payment";
 
-    UpiPayment.initializePayment(
-      {
-        vpa: "princesix3-1@okaxis", // your UPI ID
-        payeeName: "SurveyServices",
-        amount: amount.toString(),
-        transactionRef: `TXN${Date.now()}`, // unique transaction ref
-        transactionNote: "Survey Advance Payment",
-        currency: "INR",
-      },
-      successCallback,
-      failureCallback
-    );
-  };
+    const url = `upi://pay?pa=${upiId}&pn=${name}&am=${advanceAmount}&cu=INR&tn=${note}`;
 
-  const successCallback = (data) => {
-    console.log("UPI SUCCESS:", data);
-    Alert.alert("Payment Success ✅", "Your payment was successful!");
-    handleSubmit("Success");
-  };
-
-  const failureCallback = (data) => {
-    console.log("UPI FAILURE:", data);
-    Alert.alert("Payment Failed ❌", "Your payment could not be completed.");
-    handleSubmit("Failed");
-  };
-
-  // ✅ Handle method selection
-  const handlePaymentSelect = (method) => {
-    setPaymentType(method);
-    setShowPaymentModal(false);
-
-    if (method === "Credit / Debit Card") {
-      navigation.navigate("CardDetails", {
-        selectedStaff,
-        surveyType,
-        date,
-        time,
-        location,
-        notes,
-        amount: advanceAmount,
-      });
-    } else if (method === "GPay / PhonePe") {
-      handleGPayPayment();
-    } else {
-      Alert.alert(method, `Selected ${method}`, [
-        { text: "OK", onPress: () => handleSubmit("Pending") },
-      ]);
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+        Alert.alert(
+          "Complete Payment",
+          "Once you've finished paying in GPay, return to this app and tap 'Confirm Payment'."
+        );
+      } else {
+        Alert.alert("Error", "No UPI app found (GPay, PhonePe, etc.)");
+      }
+    } catch (error) {
+      console.error("Error launching UPI:", error);
+      Alert.alert("Error", "Could not open UPI payment app.");
     }
   };
+
+const handlePaymentSelect = (method) => {
+  setPaymentType(method);
+  setShowPaymentModal(false);
+
+  if (method === "Credit / Debit Card") {
+    // ✅ Just navigate, don't submit yet
+    navigation.navigate("CardDetails", {
+      selectedStaff,
+      surveyType,
+      date,
+      time,
+      location,
+      notes,
+      amount: advanceAmount,
+      userName,
+    });
+  } else if (method === "GPay / PhonePe") {
+    handleGPayPayment(); // opens UPI
+  } else {
+    // Save immediately for other methods
+    Alert.alert(method, `Selected ${method}`, [
+      { text: "OK", onPress: () => handleSubmit("Pending") },
+    ]);
+  }
+};
+
+
+
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>💳 Payment Summary</Text>
 
       <View style={styles.card}>
+        <Text style={styles.label}>User Name:</Text>
+        <TextInput style={styles.input} value={userName || ""} editable={false} />
+         
+         <Text style={styles.label}>Contact:</Text>
+         <TextInput style={styles.input} value={contactNumber || ""} editable={false}/>
+
         <Text style={styles.label}>Staff:</Text>
         <TextInput
           style={styles.input}
@@ -182,10 +187,10 @@ export default function WalletScreen({ route, navigation }) {
 
         {/* Manual submit fallback */}
         <TouchableOpacity
-          style={styles.submitButton}
-          onPress={() => handleSubmit("Pending")}
+          style={[styles.submitButton, { backgroundColor: "#28a745" }]}
+          onPress={() => handleSubmit("Success")}
         >
-          <Text style={styles.submitText}>Submit Payment</Text>
+          <Text style={styles.submitText}>Confirm Payment</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
