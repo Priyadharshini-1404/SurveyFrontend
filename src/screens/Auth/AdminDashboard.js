@@ -1,4 +1,3 @@
-// src/screens/Admin/AdminDashboard.js
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 // Correct import for default export

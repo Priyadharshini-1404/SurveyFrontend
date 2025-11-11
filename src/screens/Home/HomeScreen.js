@@ -1,5 +1,4 @@
 // src/screens/Home/HomeScreen.js
-import React from "react";
 import {
   View,
   Text,
@@ -15,6 +14,7 @@ import SurveyScreen from "../Survey/SurveyMain";
 import { Ionicons } from "@expo/vector-icons";
 import RequestSurvey from "../Survey/RequestSurvey";
 import ScheduleScreen from "../Survey/ScheduleScreen";
+import React, { useState ,useEffect } from 'react';
 
 const { width } = Dimensions.get("window");
 
@@ -26,6 +26,21 @@ export default function HomeScreen({ navigation }) {
     require("../../../assets/Property2.jpg"),
     require("../../../assets/pipeline1.jpg")
   ];
+  const [notifications, setNotifications] = useState([]);
+  const userId = 1; // Replace with logged-in user ID from AuthContext
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await axios.get(`http://192.168.1.9:5000/api/notifications/${userId}`);
+      setNotifications(res.data);
+    } catch (err) {
+      console.log("Error fetching notifications:", err);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -44,12 +59,26 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.title}>ROCKFORT SURVEYS</Text>
 
           {/* Right: Notifications */}
-          <TouchableOpacity
-            onPress={() => alert("Notifications")}
-            style={styles.headerButton}
-          >
-            <Ionicons name="notifications-outline" size={28} color="#0a74da" />
-          </TouchableOpacity>
+        <TouchableOpacity
+  onPress={() => navigation.navigate("Notifications", { notifications })}
+  style={styles.headerButton}
+>
+  <Ionicons name="notifications-outline" size={28} color="#0a74da" />
+  {notifications.some(n => n.status === "unread") && (
+    <View
+      style={{
+        position: "absolute",
+        right: 6,
+        top: 2,
+        backgroundColor: "red",
+        borderRadius: 8,
+        width: 10,
+        height: 10,
+      }}
+    />
+  )}
+</TouchableOpacity>
+
         </View>
 
         {/* Slideshow */}
