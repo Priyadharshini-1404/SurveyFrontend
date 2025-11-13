@@ -1,7 +1,66 @@
-// src/hooks/useAuth.js
-import { useContext } from 'react';
-import { AuthContext } from '../auth/AuthContext';
+import React, { createContext, useState, useEffect, useContext } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
-export default function useAuth() {
-  return useContext(AuthContext);
-}
+const AuthContext = createContext();
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [redirectScreen, setRedirectScreen] = useState(null); // ✅ added
+
+  useEffect(() => {
+    (async () => {
+      const storedUser = await AsyncStorage.getItem("user");
+      if (storedUser) setUser(JSON.parse(storedUser));
+    })();
+  }, []);
+
+  const login = async (email, password) => {
+    try {
+      const res = await axios.post("http://192.168.1.9:5000/api/auth/login", {
+        email,
+        password,
+      });
+
+      if (res.data.success) {
+        const u = {
+          id: res.data.id,
+          name: res.data.name,
+          email: res.data.email,
+          role: res.data.role,
+          token: res.data.token,
+        };
+        await AsyncStorage.setItem("user", JSON.stringify(u));
+        setUser(u);
+        return u; // ✅ return user directly
+      } else {
+        throw new Error(res.data.message || "Login failed");
+      }
+    } catch (error) {
+      throw new Error(error.message || "Error connecting to server");
+    }
+  };
+
+  const logout = async () => {
+    await AsyncStorage.removeItem("user");
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        setUser,
+        login,
+        logout,
+        redirectScreen, // ✅ include in context
+        setRedirectScreen, // ✅ include in context
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+// ✅ Custom hook
+export const useAuth = () => useContext(AuthContext);

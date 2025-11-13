@@ -1,20 +1,8 @@
-// src/screens/Home/HomeScreen.js
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  Dimensions,
-} from "react-native";
-import { SwiperFlatList } from "react-native-swiper-flatlist";
-import { SafeAreaView } from "react-native-safe-area-context";
-import SurveyScreen from "../Survey/SurveyMain";
-import { Ionicons } from "@expo/vector-icons";
 import RequestSurvey from "../Survey/RequestSurvey";
 import ScheduleScreen from "../Survey/ScheduleScreen";
 import React, { useState ,useEffect } from 'react';
+import axios from "axios";
+import { useAuth } from "../../hooks/useAuth";
 
 const { width } = Dimensions.get("window");
 
@@ -28,17 +16,27 @@ export default function HomeScreen({ navigation }) {
   ];
   const [notifications, setNotifications] = useState([]);
   const userId = 1; // Replace with logged-in user ID from AuthContext
+  const { user, setRedirectScreen } = useAuth();
 
   useEffect(() => {
     fetchNotifications();
   }, []);
 
-  const fetchNotifications = async () => {
-    try {
-      const res = await axios.get(`http://192.168.1.9:5000/api/notifications/${userId}`);
-      setNotifications(res.data);
-    } catch (err) {
-      console.log("Error fetching notifications:", err);
+ const fetchNotifications = async () => {
+  try {
+const response = await axios.get("http://192.168.1.9:5000/api/notifications");
+    console.log(response.data);
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+  }
+};
+const handleNavigate = (screenName) => {
+    if (!user) {
+      // User not logged in
+      setRedirectScreen(screenName);
+      navigation.navigate("Login");
+    } else {
+      navigation.navigate(screenName);
     }
   };
 
@@ -48,12 +46,10 @@ export default function HomeScreen({ navigation }) {
         {/* App Header */}
         <View style={styles.header}>
           {/* Left: Hamburger Menu */}
-          <TouchableOpacity
-            onPress={() => navigation.openDrawer()}
-            style={styles.headerButton}
-          >
-            <Ionicons name="menu" size={28} color="#0a74da" />
-          </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.getParent()?.openDrawer()}>
+  <Ionicons name="menu" size={24} color="black" />
+</TouchableOpacity>
+
 
           {/* Center: Title */}
           <Text style={styles.title}>ROCKFORT SURVEYS</Text>
@@ -124,11 +120,11 @@ export default function HomeScreen({ navigation }) {
             </TouchableOpacity> */}
 
             <TouchableOpacity
-              style={styles.cardButton}
-              onPress={() => navigation.navigate("RequestSurvey")}
-            >
-              <Text style={styles.cardText}>Survey Request</Text>
-            </TouchableOpacity>
+        style={styles.cardButton}
+        onPress={() => handleNavigate("RequestSurvey")}
+      >
+        <Text style={styles.cardText}>Survey Request</Text>
+      </TouchableOpacity>
 
             {/* <TouchableOpacity
               style={styles.cardButton}
@@ -137,12 +133,12 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.cardText}>Reports</Text>
             </TouchableOpacity> */}
 
-            <TouchableOpacity
-              style={styles.cardButton}
-              onPress={() => navigation.navigate("ScheduleScreen")}
-            >
-              <Text style={styles.cardText}>Scheduled Appointment</Text>
-            </TouchableOpacity>
+             <TouchableOpacity
+        style={styles.cardButton}
+        onPress={() => handleNavigate("ScheduleScreen")}
+      >
+        <Text style={styles.cardText}>Scheduled Appointment</Text>
+      </TouchableOpacity>
             <Text style={styles.content}>
               We encourage our team to take pride in their work and in providing
               exceptional solutions to our clients.

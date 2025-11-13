@@ -1,16 +1,39 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { socket } from "../../services/socket";
+import { fetchNotifications } from "../../services/notificationService";
 
-export default function NotificationsScreen({ route }) {
-  const { notifications } = route.params;
+export default function NotificationsScreen() {
+  const userId = 3; // logged-in user
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    socket.emit("register", userId);
+
+    // Fetch initial notifications
+    const load = async () => {
+      const data = await fetchNotifications(userId);
+      setNotifications(data);
+    };
+    load();
+
+    // Listen for new real-time notifications
+    socket.on("receiveNotification", (data) => {
+      setNotifications((prev) => [
+        { id: Date.now(), message: data.message, createdAt: new Date() },
+        ...prev,
+      ]);
+    });
+
+    return () => socket.off("receiveNotification");
+  }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <Text style={styles.header}>Notifications</Text>
       <FlatList
         data={notifications}
-        keyExtractor={(item) => item.NotificationID.toString()}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <Text style={styles.message}>{item.message}</Text>
@@ -18,7 +41,7 @@ export default function NotificationsScreen({ route }) {
           </View>
         )}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

@@ -1,5 +1,4 @@
-// src/screens/RequestSurvey.js
-import React, { useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -15,11 +14,12 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
+import { sendNotification } from "../../services/notificationService" // existing axios API
+import { socket } from "../../services/socket"; // ✅ add this import
 
 export default function RequestSurvey() {
   const navigation = useNavigation();
   const route = useRoute();
-
   const [name, setName] = useState("");
   const [surveyType, setSurveyType] = useState("");
   const [location, setLocation] = useState("");
@@ -28,6 +28,13 @@ export default function RequestSurvey() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
+  const userId = 3; // logged-in user
+  const adminId = 1; // admin
+
+  useEffect(() => {
+    // Register user socket
+    socket.emit("register", userId);
+  }, []);
   // ✅ Survey type options
   const surveyOptions = [
     "Property Survey",
@@ -56,8 +63,8 @@ export default function RequestSurvey() {
     }, [route.params])
   );
 
-  // ✅ Handle date change
-  const handleDateChange = (event, selectedDate) => {
+
+   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
       const formattedDate = selectedDate.toISOString().split("T")[0];
@@ -65,7 +72,7 @@ export default function RequestSurvey() {
     }
   };
 
-  // ✅ Handle form submission (saves to backend)
+
   const handleSubmit = async () => {
     if (!name || !surveyType || !location || !contact || !surveyDate) {
       Alert.alert("Error", "Please fill all fields before submitting.");
@@ -88,11 +95,23 @@ export default function RequestSurvey() {
       const data = await response.json();
 
       if (response.ok) {
+        // ✅ Notify admin both via socket and DB
+        const message = `User ${name} has requested a ${surveyType} survey`;
+
+        await sendNotification(userId, adminId, message, "survey");
+
+        // Socket real-time push
+        socket.emit("sendNotification", {
+          receiverId: adminId,
+          message,
+          type: "survey",
+        });
+
         Alert.alert("Success", "Survey request submitted successfully!", [
           { text: "OK", onPress: () => navigation.navigate("Home") },
         ]);
 
-        // Clear form fields
+        // clear fields
         setName("");
         setSurveyType("");
         setLocation("");
@@ -167,7 +186,6 @@ export default function RequestSurvey() {
         </View>
       </Modal>
 
-      {/* Location Selector */}
       <View style={styles.locationContainer}>
         <TextInput
           style={[styles.input, { flex: 1 }]}
@@ -175,7 +193,7 @@ export default function RequestSurvey() {
           value={location}
           editable={true}
         />
-        <TouchableOpacity
+       <TouchableOpacity
           style={styles.locationIcon}
           onPress={() =>
             navigation.navigate("MapPickerScreen", { from: "RequestSurvey" })
@@ -204,7 +222,6 @@ export default function RequestSurvey() {
         />
       )}
 
-      {/* Contact Input */}
       <TextInput
         style={styles.input}
         placeholder="Contact Number"
@@ -213,13 +230,15 @@ export default function RequestSurvey() {
         onChangeText={setContact}
       />
 
-      {/* Submit Button */}
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Submit Request</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
+
+// (Your styles stay same)
+
 
 const styles = StyleSheet.create({
   container: {
