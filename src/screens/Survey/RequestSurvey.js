@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { sendNotification } from "../../services/notificationService" // existing axios API
 import { socket } from "../../services/socket"; // ✅ add this import
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RequestSurvey() {
   const navigation = useNavigation();
@@ -127,6 +128,7 @@ export default function RequestSurvey() {
   };
 
   return (
+    <SafeAreaView>
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>Request a New Survey</Text>
 
@@ -233,7 +235,7 @@ export default function RequestSurvey() {
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Submit Request</Text>
       </TouchableOpacity>
-    </ScrollView>
+    </ScrollView></SafeAreaView>
   );
 }
 

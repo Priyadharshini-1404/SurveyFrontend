@@ -1,3 +1,4 @@
+// src/hooks/useAuth.js
 import React, { createContext, useState, useEffect, useContext } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -6,21 +7,28 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [redirectScreen, setRedirectScreen] = useState(null); // ✅ added
 
   useEffect(() => {
     (async () => {
-      const storedUser = await AsyncStorage.getItem("user");
-      if (storedUser) setUser(JSON.parse(storedUser));
+      try {
+        const storedUser = await AsyncStorage.getItem("user");
+        if (storedUser) setUser(JSON.parse(storedUser));
+      } catch (err) {
+        console.log("Error reading user from storage:", err);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
   const login = async (email, password) => {
     try {
-      const res = await axios.post("http://192.168.1.9:5000/api/auth/login", {
-        email,
-        password,
-      });
+      const res = await axios.post(
+        "http://192.168.1.9:5000/api/auth/login",
+        { email, password }
+      );
 
       if (res.data.success) {
         const u = {
@@ -37,13 +45,17 @@ export const AuthProvider = ({ children }) => {
         throw new Error(res.data.message || "Login failed");
       }
     } catch (error) {
-      throw new Error(error.message || "Error connecting to server");
+      throw new Error(error.response?.data?.message || error.message || "Login error");
     }
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem("user");
-    setUser(null);
+    try {
+      await AsyncStorage.removeItem("user");
+      setUser(null);
+    } catch (err) {
+      console.log("Error during logout:", err);
+    }
   };
 
   return (
@@ -53,6 +65,7 @@ export const AuthProvider = ({ children }) => {
         setUser,
         login,
         logout,
+        loading,
         redirectScreen, // ✅ include in context
         setRedirectScreen, // ✅ include in context
       }}

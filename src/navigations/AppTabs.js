@@ -1,23 +1,20 @@
+// src/navigations/AppTabs.js
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
-// Import your screens
+// Screens
 import HomeScreen from '../screens/Home/HomeScreen';
-import SurveyStack from './SurveyStack'; // Assuming you have this stack
-import WalletScreen from '../screens/Wallet/WalletScreen';
-import ProfileScreen from '../screens/Profile/ProfileScreen';
 import ScheduleScreen from '../screens/Survey/ScheduleScreen';
+import ProfileScreen from '../screens/Profile/ProfileScreen';
+
 const Tab = createBottomTabNavigator();
 
-// --- Bottom Tabs (Main App) ---
-// This component contains only the bottom tab navigator.
 export default function AppTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        headerShown: false, // Headers will be handled by the Drawer/Stack
-        tabBarShowLabel: true,
+        headerShown: false,
         tabBarActiveTintColor: '#0a74da',
         tabBarInactiveTintColor: '#777',
         tabBarStyle: {
@@ -29,17 +26,9 @@ export default function AppTabs() {
         },
         tabBarIcon: ({ color, size, focused }) => {
           let iconName;
-          if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Survey') {
-            iconName = focused ? 'clipboard' : 'clipboard-outline';
-          } else if (route.name === 'Wallet') {
-            iconName = focused ? 'wallet' : 'wallet-outline';
-          } else if (route.name === 'Chat') {
-            iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
-          }
+          if (route.name === 'Home') iconName = focused ? 'home' : 'home-outline';
+          else if (route.name === 'Survey') iconName = focused ? 'clipboard' : 'clipboard-outline';
+          else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
           return <Ionicons name={iconName} size={size} color={color} />;
         },
       })}

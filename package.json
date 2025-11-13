@@ -47,7 +47,8 @@
     "react-native-worklets": "^0.5.1",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
-    "yup": "^1.7.1"
+    "yup": "^1.7.1",
+    "expo-linear-gradient": "~15.0.7"
   },
   "private": true,
   "keywords": [],

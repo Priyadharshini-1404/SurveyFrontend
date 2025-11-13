@@ -1,80 +1,150 @@
-import React from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import React, { useEffect, useRef } from "react";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  Animated,
+  Dimensions,
+  StatusBar,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 
-export default function SplashScreen({ navigation }) {
+const { width, height } = Dimensions.get("window");
+
+export default function SplashScreen() {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.9)).current;
+
+  useEffect(() => {
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 3200,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          friction: 5,
+          tension: 60,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+  }, []);
+
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Rockfort Engineering</Text>
-
-        <Image
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <LinearGradient
+        colors={["#0a0f1f", "#1c1f33", "#2d3748"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradient}
+      >
+        {/* Background Image with soft overlay */}
+        {/* <Image
           source={require("../../../assets/images/Splash.png")}
-          style={styles.logo}
-        />
+          style={styles.backgroundImage}
+          blurRadius={1}
+        /> */}
 
-        <Text style={styles.content}>
-          Welcome to Rockfort Surveys! Submit and track your surveys seamlessly.{"\n\n"}
-          We would like to introduce ourselves, with dignity and pride, as one of
-          the experienced Survey consultant firms in Chennai, India.{"\n\n"}
-          We are engaged in providing a comprehensive range of surveying services,
-          using Digital Instruments and modern technologies to produce well-presented
-          and accurate data.
-        </Text>
+        <View style={styles.overlay}>
+          <Animated.View
+            style={[
+              styles.logoContainer,
+              { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+            ]}
+          >
+            <Image
+              source={require("../../../assets/images/Splash.png")}
+              style={styles.logo}
+            />
+          </Animated.View>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.replace("MainApp")}
-        >
-          <Text style={styles.buttonText}>Get Started</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          <Animated.Text style={[styles.title, { opacity: fadeAnim }]}>
+            Welcome to Rockfort Surveys!
+          </Animated.Text>
+
+          <Animated.Text style={[styles.subtitle, { opacity: fadeAnim }]}>
+            Precision • Integrity • Innovation
+          </Animated.Text>
+
+          <View style={styles.line} />
+
+          <Animated.Text style={[styles.content, { opacity: fadeAnim }]}>
+            Submit and track your surveys seamlessly{"/n"}
+            Empowering modern surveying with{"\n"}
+            accuracy, innovation, and trust.  We would like to introduce ourselves, with dignity and pride, as one of
+          the experienced Survey consultant firms in Chennai,TamilNadu.
+          </Animated.Text>
+        </View>
+      </LinearGradient>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-  },
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#000",
+  },
+  gradient: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    position: "relative",
+  },
+  backgroundImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: width,
+    height: height,
+    resizeMode: "cover",
+    opacity: 0.15, // soft fade behind text
+  },
+  overlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 25,
+  },
+  logoContainer: {
+    marginBottom: 20,
   },
   logo: {
-    width: 220,
-    height: 220,
+    width: width * 0.8,
+    height: width * 0.8,
     resizeMode: "contain",
-    marginBottom: 30,
-    marginTop: 30,
   },
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 10,
+    fontSize: 30,
+    fontWeight: "800",
+    color: "#FFFFFF",
     textAlign: "center",
-    color: "#000",
+    marginTop: 10,
+    letterSpacing: 1,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#CDE4FF",
+    textAlign: "center",
+    marginTop: 8,
+    letterSpacing: 0.5,
+  },
+  line: {
+    width: 80,
+    height: 3,
+    backgroundColor: "#00BFFF",
+    borderRadius: 2,
+    marginVertical: 20,
   },
   content: {
-    fontSize: 16,
-    color: "#555",
+    fontSize: 15,
+    color: "#EAECEE",
     textAlign: "center",
-    marginBottom: 40,
-    paddingHorizontal: 10,
-    lineHeight: 24,
-  },
-  button: {
-    backgroundColor: "#0a74da",
-    paddingVertical: 14,
-    paddingHorizontal: 60,
-    borderRadius: 30,
-    elevation: 3,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
+    lineHeight: 22,
+    maxWidth: 340,
   },
 });

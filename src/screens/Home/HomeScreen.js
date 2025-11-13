@@ -1,8 +1,22 @@
-import RequestSurvey from "../Survey/RequestSurvey";
-import ScheduleScreen from "../Survey/ScheduleScreen";
-import React, { useState ,useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import {
+  ScrollView,
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Dimensions, // ✅ ADD THIS
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import { Ionicons } from "@expo/vector-icons"; // ✅ make sure you have this too
+import SwiperFlatList from "react-native-swiper-flatlist"; // ✅ for the slideshow
 import axios from "axios";
 import { useAuth } from "../../hooks/useAuth";
+import RequestSurvey from "../Survey/RequestSurvey";
+import ScheduleScreen from "../Survey/ScheduleScreen";
+
 
 const { width } = Dimensions.get("window");
 
