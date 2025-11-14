@@ -9,7 +9,7 @@ import ContactUs from '../screens/Drawer/ContactUs';
 import TermsScreen from '../screens/Drawer/TermsScreen';
 import PrivacyScreen from '../screens/Drawer/Privacy';
 import ChangePasswordScreen from '../screens/Drawer/ChangePassword';
-import LogoutScreen from '../screens/Drawer/Logout';
+import LogoutScreen from '../screens/Home/Logout';
 
 const Drawer = createDrawerNavigator();
 

@@ -1,22 +1,21 @@
-import React, { useState, useEffect } from "react";
-import {
+import React, { useState, useEffect } from 'react';
+import axios from "axios";
+import { useAuth } from "../../hooks/useAuth";
+import { 
+  
   ScrollView,
   View,
   Text,
   TouchableOpacity,
   Image,
   StyleSheet,
-  Dimensions, // ✅ ADD THIS
+  Dimensions
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-
-import { Ionicons } from "@expo/vector-icons"; // ✅ make sure you have this too
-import SwiperFlatList from "react-native-swiper-flatlist"; // ✅ for the slideshow
-import axios from "axios";
-import { useAuth } from "../../hooks/useAuth";
+import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { SwiperFlatList } from 'react-native-swiper-flatlist';
 import RequestSurvey from "../Survey/RequestSurvey";
 import ScheduleScreen from "../Survey/ScheduleScreen";
-
 
 const { width } = Dimensions.get("window");
 
@@ -28,67 +27,57 @@ export default function HomeScreen({ navigation }) {
     require("../../../assets/Property2.jpg"),
     require("../../../assets/pipeline1.jpg")
   ];
+
   const [notifications, setNotifications] = useState([]);
-  const userId = 1; // Replace with logged-in user ID from AuthContext
   const { user, setRedirectScreen } = useAuth();
 
   useEffect(() => {
     fetchNotifications();
   }, []);
 
- const fetchNotifications = async () => {
-  try {
-const response = await axios.get("http://192.168.1.9:5000/api/notifications");
-    console.log(response.data);
-  } catch (error) {
-    console.error("Error fetching notifications:", error);
-  }
-};
-const handleNavigate = (screenName) => {
-    if (!user) {
-      // User not logged in
-      setRedirectScreen(screenName);
-      navigation.navigate("Login");
-    } else {
-      navigation.navigate(screenName);
+  const fetchNotifications = async () => {
+    try {
+      const response = await axios.get("http://192.168.1.7:5000/api/notifications");
+      setNotifications(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
     }
   };
+
+const handleNavigate = (screenName) => {
+  if (!user) {
+    setRedirectScreen(screenName);
+
+    // THIS is the correct navigation to go to Login
+    navigation.getParent()?.navigate("Login");
+
+  } else {
+    navigation.navigate(screenName);
+  }
+};
+
+console.log("CURRENT USER:", user);
+
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.container}>
-        {/* App Header */}
+        {/* Header */}
         <View style={styles.header}>
-          {/* Left: Hamburger Menu */}
-        <TouchableOpacity onPress={() => navigation.getParent()?.openDrawer()}>
-  <Ionicons name="menu" size={24} color="black" />
-</TouchableOpacity>
-
-
-          {/* Center: Title */}
+          <TouchableOpacity onPress={() => navigation.openDrawer()}>
+            <Ionicons name="menu" size={24} color="black" />
+          </TouchableOpacity>
           <Text style={styles.title}>ROCKFORT SURVEYS</Text>
-
-          {/* Right: Notifications */}
-        <TouchableOpacity
-  onPress={() => navigation.navigate("Notifications", { notifications })}
-  style={styles.headerButton}
->
-  <Ionicons name="notifications-outline" size={28} color="#0a74da" />
-  {notifications.some(n => n.status === "unread") && (
-    <View
-      style={{
-        position: "absolute",
-        right: 6,
-        top: 2,
-        backgroundColor: "red",
-        borderRadius: 8,
-        width: 10,
-        height: 10,
-      }}
-    />
-  )}
-</TouchableOpacity>
-
+          <TouchableOpacity
+            onPress={() => handleNavigate("Notifications")}
+            style={styles.headerButton}
+          >
+            <Ionicons name="notifications-outline" size={28} color="#0a74da" />
+            {notifications.some(n => n.status === "unread") && (
+              <View style={styles.notificationBadge} />
+            )}
+          </TouchableOpacity>
         </View>
 
         {/* Slideshow */}
@@ -113,67 +102,45 @@ const handleNavigate = (screenName) => {
             ))}
           </SwiperFlatList>
         </View>
+
+        {/* Company Info */}
         <Text style={styles.content1}>
-          Rockfort Engineering is a company built around more and more assets:
-          the services to its valued clients and its people. We believe work is
-          more than just a place you go every day. It should be a place of
-          professional growth, analysis and interpersonal relationships. It’s
-          about being motivated and inspired to achieve certain goals.
+          Rockfort Engineering is a company built around more and more assets: 
+          the services to its valued clients and its people...
         </Text>
+
         {/* My Surveys Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>My Surveys</Text>
           <View style={styles.buttonContainer}>
-            {/* <TouchableOpacity
-              style={styles.cardButton}
-              onPress={() =>
-                navigation.navigate("Survey", { screen: "SurveyMain" })
-              }
-            >
-              <Text style={styles.cardText}>My Surveys</Text>
-            </TouchableOpacity> */}
+          <TouchableOpacity
+  style={styles.cardButton}
+  onPress={() => handleNavigate("RequestSurvey")}
+>
+  <Text style={styles.cardText}>Survey Request</Text>
+</TouchableOpacity>
 
-            <TouchableOpacity
-        style={styles.cardButton}
-        onPress={() => handleNavigate("RequestSurvey")}
-      >
-        <Text style={styles.cardText}>Survey Request</Text>
-      </TouchableOpacity>
+<TouchableOpacity
+  style={styles.cardButton}
+  onPress={() => handleNavigate("ScheduleScreen")}
+>
+  <Text style={styles.cardText}>Scheduled Appointment</Text>
+</TouchableOpacity>
 
-            {/* <TouchableOpacity
-              style={styles.cardButton}
-              onPress={() => navigation.navigate("Reports")}
-            >
-              <Text style={styles.cardText}>Reports</Text>
-            </TouchableOpacity> */}
-
-             <TouchableOpacity
-        style={styles.cardButton}
-        onPress={() => handleNavigate("ScheduleScreen")}
-      >
-        <Text style={styles.cardText}>Scheduled Appointment</Text>
-      </TouchableOpacity>
-            <Text style={styles.content}>
-              We encourage our team to take pride in their work and in providing
-              exceptional solutions to our clients.
-            </Text>
-            <Image
-              source={require("../../../assets/home4.jpg")} // your logo path
-              style={styles.logo}
-            />
-
-            <Text style={styles.content2}>
-              Our Corporate Philosophy Provide our services that are the very
-              best available in the market and will never compromise on service
-              quality and safety on any circumstances. Deliver a level of
-              service that exceeds our client’s expectations. Develop and
-              embrace new technologies and techniques to the advantage of our
-              clients and our business. Ensure the company’s services conserve
-              the integrity of the environment. Educate & train the youth
-              interested in this growing field, thereby contributing to the
-              community at large.
-            </Text>
           </View>
+
+          <Text style={styles.content}>
+            We encourage our team to take pride in their work and in providing exceptional solutions to our clients.
+          </Text>
+
+          <Image
+            source={require("../../../assets/home4.jpg")}
+            style={styles.logo}
+          />
+
+          <Text style={styles.content2}>
+            Our Corporate Philosophy: Provide our services that are the very best...
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -190,46 +157,25 @@ const styles = StyleSheet.create({
     marginTop: 40,
     marginBottom: 10,
   },
-  headerButton: {
-    padding: 5,
+  headerButton: { padding: 5 },
+  notificationBadge: {
+    position: "absolute",
+    right: 6,
+    top: 2,
+    backgroundColor: "red",
+    borderRadius: 8,
+    width: 10,
+    height: 10,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#0a74da",
-  },
-
+  title: { fontSize: 20, fontWeight: "bold", color: "#0a74da" },
   sliderContainer: { height: 300, marginBottom: 20, marginTop: 20 },
   slideImage: { width: "170%", height: 250, borderRadius: 10 },
   section: { marginVertical: 20, paddingHorizontal: 20, marginTop: -25 },
   sectionTitle: { fontSize: 22, fontWeight: "600", marginBottom: 12 },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    flexWrap: "wrap",
-  },
-  content: {
-    fontSize: 18,
-    color: "#666",
-    textAlign: "center",
-    marginBottom: 40,
-    paddingHorizontal: 10,
-    marginTop: 10,
-  },
-  content1: {
-    fontSize: 18,
-    color: "#666",
-    textAlign: "center",
-    marginBottom: 40,
-    paddingHorizontal: 10,
-  },
-  content2: {
-    fontSize: 18,
-    color: "#666",
-    textAlign: "justify",
-    marginBottom: 40,
-    paddingHorizontal: 10,
-  },
+  buttonContainer: { flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap" },
+  content: { fontSize: 18, color: "#666", textAlign: "center", marginBottom: 40, paddingHorizontal: 10, marginTop: 10 },
+  content1: { fontSize: 18, color: "#666", textAlign: "center", marginBottom: 40, paddingHorizontal: 10 },
+  content2: { fontSize: 18, color: "#666", textAlign: "justify", marginBottom: 40, paddingHorizontal: 10 },
   cardButton: {
     width: "48%",
     backgroundColor: "#f1f4f9",
@@ -243,11 +189,6 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     elevation: 4,
   },
-
-  logo: {
-    marginTop: -20,
-    resizeMode: "contain",
-    marginBottom: 30,
-  },
+  logo: { marginTop: -20, resizeMode: "contain", marginBottom: 30 },
   cardText: { fontSize: 16, color: "#333", fontWeight: "800" },
 });

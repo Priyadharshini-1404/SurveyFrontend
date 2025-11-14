@@ -19,7 +19,8 @@ export default function ProfileScreen({ navigation }) {
         <Text style={styles.sectionTitle}>Customer Support:</Text>
         <Text style={styles.text}>Contact us at support@rockfortsurveys.com</Text>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.replace('Login')}>
+        <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.navigate("Login")
+}>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </View>

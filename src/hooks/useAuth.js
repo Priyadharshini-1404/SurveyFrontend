@@ -8,7 +8,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [redirectScreen, setRedirectScreen] = useState(null); // ✅ added
+  const [redirectScreen, setRedirectScreen] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -25,10 +25,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const res = await axios.post(
-        "http://192.168.1.9:5000/api/auth/login",
-        { email, password }
-      );
+      const res = await axios.post("http://192.168.1.7:5000/api/auth/login", { email, password });
 
       if (res.data.success) {
         const u = {
@@ -40,7 +37,7 @@ export const AuthProvider = ({ children }) => {
         };
         await AsyncStorage.setItem("user", JSON.stringify(u));
         setUser(u);
-        return u; // ✅ return user directly
+        return u;
       } else {
         throw new Error(res.data.message || "Login failed");
       }
@@ -66,8 +63,8 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         loading,
-        redirectScreen, // ✅ include in context
-        setRedirectScreen, // ✅ include in context
+        redirectScreen,
+        setRedirectScreen,
       }}
     >
       {children}
@@ -75,5 +72,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// ✅ Custom hook
 export const useAuth = () => useContext(AuthContext);

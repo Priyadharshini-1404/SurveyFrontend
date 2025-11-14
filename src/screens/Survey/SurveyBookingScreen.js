@@ -1,119 +1,54 @@
+// src/screens/Survey/SurveyBookingScreen.js
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  FlatList,
-} from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { staffList } from "../../data/staffData";
+import { useStaff } from "../../hooks/useStaff";
 
 const SurveyBookingScreen = ({ route, navigation }) => {
-  // ✅ Extract all params safely here
-  const {
-    userName = "",
-    contactNumber = "",
-    surveyType = "",
-    date = "",
-    time = "",
-    location = "",
-    notes = "",
-  } = route?.params || {};
-
+  const { userName, contactNumber, surveyType, date, time, location, notes } = route.params || {};
+  const { staffList } = useStaff(); // ✅ live staff list
   const [selectedStaff, setSelectedStaff] = useState(null);
 
-  const surveyRate = "Based on Location";
   const advanceAmount = 1;
 
   const handleConfirm = () => {
-    if (!selectedStaff) {
-      alert("Please select a staff before proceeding!");
-      return;
-    }
-
-    // ✅ Pass all params to WalletScreen
-    navigation.navigate("Wallet", {
-      userName,
-      contactNumber,
-      selectedStaff,
-      surveyType,
-      date,
-      time,
-      location,
-      notes,
-    });
+    if (!selectedStaff) return alert("Please select a staff!");
+    navigation.navigate("Wallet", { userName, contactNumber, selectedStaff, surveyType, date, time, location, notes });
   };
-
-  const renderHeader = () => (
-    <View style={{ padding: 20 }}>
-      <Text style={styles.title}>Survey Booking Details</Text>
-
-      {/* Survey Info */}
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>📋 Survey Information</Text>
-        <Text style={styles.detail}>User Name: {userName}</Text>
-        <Text style={styles.detail}>Contact No: {contactNumber}</Text>
-        <Text style={styles.detail}>Type: {surveyType}</Text>
-        <Text style={styles.detail}>Date: {date}</Text>
-        <Text style={styles.detail}>Time: {time}</Text>
-        <Text style={styles.detail}>Location: {location}</Text>
-      </View>
-
-      {/* Rate Section */}
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>💰 Survey Charges</Text>
-        <Text style={styles.detail}>Total Rate: ₹{surveyRate}</Text>
-        <Text style={[styles.detail, { color: "green", fontWeight: "bold" }]}>
-          Advance Amount: ₹{advanceAmount}
-        </Text>
-      </View>
-
-      <View style={{ marginBottom: 10 }}>
-        <Text style={styles.sectionTitle}>👷 Choose Registered Staff</Text>
-      </View>
-    </View>
-  );
-
-  const renderFooter = () => (
-    <TouchableOpacity style={styles.payButton} onPress={handleConfirm}>
-      <Text style={styles.payText}>
-        {selectedStaff
-          ? `Proceed to Pay ₹${advanceAmount}`
-          : "Select a Staff to Continue"}
-      </Text>
-    </TouchableOpacity>
-  );
 
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
         data={staffList}
         keyExtractor={(item) => item.id}
+        ListHeaderComponent={
+          <View style={{ padding: 20 }}>
+            <Text style={styles.title}>👷 Choose Staff</Text>
+          </View>
+        }
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={[
-              styles.staffCard,
-              selectedStaff?.id === item.id && styles.selectedCard,
-            ]}
+            style={[styles.staffCard, selectedStaff?.id === item.id && styles.selectedCard]}
             onPress={() => setSelectedStaff(item)}
           >
-            <Image source={item.image} style={styles.staffImage} />
+            <Image source={item.image ? { uri: item.image } : require("../../../assets/abc.png")} style={styles.staffImage} />
             <View style={{ flex: 1 }}>
               <Text style={styles.staffName}>{item.name}</Text>
-              <Text style={styles.detail}>Experience: {item.experience}</Text>
+              <Text>Experience: {item.experience}</Text>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Ionicons name="star" color="#FFD700" size={16} />
-                <Text style={styles.detail}> {item.rating} / 5</Text>
+                <Text> {item.rating} / 5</Text>
               </View>
-              <Text style={styles.detail}>Contact: {item.contact}</Text>
+              <Text>Contact: {item.contact}</Text>
             </View>
           </TouchableOpacity>
         )}
-        ListHeaderComponent={renderHeader}
-        ListFooterComponent={renderFooter}
+        ListFooterComponent={
+          <TouchableOpacity style={styles.payButton} onPress={handleConfirm}>
+            <Text style={styles.payText}>{selectedStaff ? `Proceed ₹${advanceAmount}` : "Select Staff"}</Text>
+          </TouchableOpacity>
+        }
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
       />
     </SafeAreaView>
@@ -125,40 +60,10 @@ export default SurveyBookingScreen;
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f9f9f9" },
   title: { fontSize: 22, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  sectionTitle: { fontSize: 18, fontWeight: "600", marginBottom: 8 },
-  detail: { fontSize: 15, color: "#333", marginVertical: 2 },
-  staffCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    marginBottom: 10,
-    backgroundColor: "#fff",
-  },
-  selectedCard: {
-    borderColor: "#1E90FF",
-    backgroundColor: "#E6F0FF",
-  },
+  staffCard: { flexDirection: "row", alignItems: "center", padding: 10, borderWidth: 1, borderColor: "#ddd", borderRadius: 10, marginBottom: 10, backgroundColor: "#fff" },
+  selectedCard: { borderColor: "#1E90FF", backgroundColor: "#E6F0FF" },
   staffImage: { width: 70, height: 70, borderRadius: 35, marginRight: 10 },
   staffName: { fontSize: 16, fontWeight: "bold" },
-  payButton: {
-    backgroundColor: "#1E90FF",
-    padding: 15,
-    borderRadius: 12,
-    alignItems: "center",
-    marginTop: 20,
-  },
+  payButton: { backgroundColor: "#1E90FF", padding: 15, borderRadius: 12, alignItems: "center", marginTop: 20 },
   payText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
 });

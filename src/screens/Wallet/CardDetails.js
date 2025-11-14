@@ -17,7 +17,7 @@ export default function CardDetailsScreen({ route, navigation }) {
     }
 
    try {
-  const res = await fetch("http://192.168.1.9:5000/api/cardpayments", {
+  const res = await fetch("http://192.168.1.7:5000/api/cardpayments", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

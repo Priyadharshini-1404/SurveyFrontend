@@ -8,7 +8,9 @@ import ManageUsers from '../screens/Admin/ManageUser';
 import AddUser from '../screens/Admin/AddUser';
 import AddStaff from '../screens/Admin/AddStaff';
 import UsersList from '../screens/Admin/UserList';
-
+import RequestSurvey from '../screens/Survey/RequestSurvey';
+import ScheduleScreen from '../screens/Survey/ScheduleScreen';
+import LogoutScreen from '../screens/Home/Logout';
 const Drawer = createDrawerNavigator();
 
 export default function AdminDrawer() {
@@ -19,6 +21,11 @@ export default function AdminDrawer() {
       <Drawer.Screen name="AddUser" component={AddUser} />
       <Drawer.Screen name="AddStaff" component={AddStaff} />
       <Drawer.Screen name="UsersList" component={UsersList} />
+      <Drawer.Screen name="Logout" component={LogoutScreen}/>
+      
+
+
+      
     </Drawer.Navigator>
   );
 }

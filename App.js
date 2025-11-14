@@ -6,6 +6,7 @@ import { ActivityIndicator, View } from "react-native";
 
 // Auth Context
 import { AuthProvider, useAuth } from "./src/hooks/useAuth";
+import { StaffProvider } from "./src/hooks/useStaff";
 
 // Screens
 import SplashScreen from "./src/screens/Auth/SplashScreen";
@@ -14,7 +15,8 @@ import RegisterScreen from "./src/screens/Auth/RegisterScreen";
 
 // Navigators
 import AdminDrawer from "./src/navigations/AdminDrawer";
-import MainDrawer from "./src/navigations/MainDrawer"; // normal user
+import DrawerNavigator from "./src/navigations/DrawerNavigation";
+import LogoutScreen from "./src/screens/Home/Logout";
 
 const Stack = createNativeStackNavigator();
 
@@ -40,6 +42,7 @@ function RootNav() {
         <>
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="Logout" component={LogoutScreen}/>
         </>
       ) : (
         <>
@@ -47,7 +50,7 @@ function RootNav() {
           {user.role === "admin" ? (
             <Stack.Screen name="AdminDrawer" component={AdminDrawer} />
           ) : (
-            <Stack.Screen name="MainDrawer" component={MainDrawer} />
+            <Stack.Screen name="MainDrawer" component={DrawerNavigator} />
           )}
         </>
       )}
@@ -57,10 +60,12 @@ function RootNav() {
 
 export default function App() {
   return (
+       <StaffProvider>
     <AuthProvider>
       <NavigationContainer>
         <RootNav />
       </NavigationContainer>
     </AuthProvider>
+    </StaffProvider>
   );
 }
