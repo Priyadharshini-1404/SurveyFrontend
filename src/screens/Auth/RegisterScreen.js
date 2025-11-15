@@ -1,7 +1,7 @@
 // src/screens/Auth/RegisterScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import useAuth from '../../hooks/useAuth'; // custom hook for auth
+import { useAuth } from '../../hooks/useAuth';
 export default function RegisterScreen({ navigation }) {
   const { register } = useAuth(); // your auth hook
   const [name, setName] = useState('');

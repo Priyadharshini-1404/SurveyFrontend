@@ -1,4 +1,3 @@
-// src/hooks/useAuth.js
 import React, { createContext, useState, useEffect, useContext } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -8,21 +7,22 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [redirectScreen, setRedirectScreen] = useState(null);
 
   useEffect(() => {
-    (async () => {
+    const loadUser = async () => {
       try {
         const storedUser = await AsyncStorage.getItem("user");
         if (storedUser) setUser(JSON.parse(storedUser));
       } catch (err) {
-        console.log("Error reading user from storage:", err);
+        console.log(err);
       } finally {
         setLoading(false);
       }
-    })();
+    };
+    loadUser();
   }, []);
 
+  // 🔹 Login
   const login = async (email, password) => {
     try {
       const res = await axios.post("http://192.168.1.7:5000/api/auth/login", { email, password });
@@ -41,35 +41,37 @@ export const AuthProvider = ({ children }) => {
       } else {
         throw new Error(res.data.message || "Login failed");
       }
-    } catch (error) {
-      throw new Error(error.response?.data?.message || error.message || "Login error");
+    } catch (err) {
+      throw new Error(err.response?.data?.message || err.message || "Login error");
     }
   };
 
+  // 🔹 Register
+  const register = async ({ name, email, password }) => {
+    try {
+      const res = await axios.post("http://192.168.1.7:5000/api/auth/register", { name, email, password });
+      return res.data; // should return { success: true/false, message: "...", etc. }
+    } catch (err) {
+      throw new Error(err.response?.data?.message || err.message || "Registration error");
+    }
+  };
+
+  // 🔹 Logout
   const logout = async () => {
     try {
       await AsyncStorage.removeItem("user");
       setUser(null);
     } catch (err) {
-      console.log("Error during logout:", err);
+      console.log(err);
     }
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        setUser,
-        login,
-        logout,
-        loading,
-        redirectScreen,
-        setRedirectScreen,
-      }}
-    >
+    <AuthContext.Provider value={{ user, setUser, login, logout, register, loading }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
+// 🔹 Correct named export
 export const useAuth = () => useContext(AuthContext);

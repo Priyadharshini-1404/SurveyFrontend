@@ -49,13 +49,14 @@ const handleNavigate = (screenName) => {
   if (!user) {
     setRedirectScreen(screenName);
 
-    // THIS is the correct navigation to go to Login
+    // Go to Login (root stack)
     navigation.getParent()?.navigate("Login");
-
   } else {
-    navigation.navigate(screenName);
+    // If user is logged in, navigate normally
+    navigation.navigate("HomeStack", { screen: screenName });
   }
 };
+
 
 console.log("CURRENT USER:", user);
 
@@ -126,6 +127,7 @@ console.log("CURRENT USER:", user);
 >
   <Text style={styles.cardText}>Scheduled Appointment</Text>
 </TouchableOpacity>
+
 
           </View>
 

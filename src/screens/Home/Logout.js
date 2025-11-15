@@ -1,40 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { View, ActivityIndicator, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { resetTo } from "../../navigations/RootNavigation";
 
-export default function LogoutScreen({ navigation }) {
+export default function LogoutScreen() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
-    const showLogoutAlert = () => {
+    const logout = () => {
       Alert.alert(
-        "Confirm Logout",
+        "Logout",
         "Are you sure you want to logout?",
         [
-          {
-            text: "Cancel",
-            onPress: () => navigation.goBack(),
-            style: "cancel",
-          },
+          { text: "Cancel", style: "cancel" },
           {
             text: "Yes",
             onPress: async () => {
               setIsLoggingOut(true);
-
               try {
-                await AsyncStorage.removeItem("user");
-                await AsyncStorage.removeItem("userToken");
-                await AsyncStorage.removeItem("userData");
-
-                // 🔥 Correct Reset for your app structure
-               navigation.getParent()?.getParent()?.reset({
-  index: 0,
-  routes: [{ name: "LoginScreen" }],
-});
-
-
+                await AsyncStorage.clear();  // clear user token/data
+                resetTo("Login");           // reset root navigation
               } catch (err) {
-                console.log("Logout error:", err);
+                console.log(err);
                 setIsLoggingOut(false);
               }
             },
@@ -44,7 +31,7 @@ export default function LogoutScreen({ navigation }) {
       );
     };
 
-    setTimeout(showLogoutAlert, 300);
+    setTimeout(logout, 200);
   }, []);
 
   return (
