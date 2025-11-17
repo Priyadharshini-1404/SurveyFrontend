@@ -12,7 +12,7 @@ export default function AddUser({ navigation }) {
 
   const submit = async () => {
     try {
-      await axios.post('http://192.168.1.7:5000/api/users/admin/add',
+      await axios.post('http://192.168.1.11:5000/api/users/admin/add',
         { name, email, password, role }, authHeaders());
       Alert.alert('Added');
       navigation.goBack();

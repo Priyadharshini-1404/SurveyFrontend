@@ -37,7 +37,7 @@ export default function HomeScreen({ navigation }) {
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get("http://192.168.1.7:5000/api/notifications");
+      const response = await axios.get("http://192.168.1.11:5000/api/notifications");
       setNotifications(response.data);
       console.log(response.data);
     } catch (error) {
@@ -45,17 +45,17 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
+// HomeScreen.js
 const handleNavigate = (screenName) => {
   if (!user) {
-    setRedirectScreen(screenName);
-
-    // Go to Login (root stack)
-    navigation.getParent()?.navigate("Login");
+    setRedirectScreen(screenName); // save intended screen
+    navigation.navigate("Login"); // go to login first
   } else {
-    // If user is logged in, navigate normally
-    navigation.navigate("HomeStack", { screen: screenName });
+    // logged-in user
+    navigation.navigate(screenName);
   }
 };
+
 
 
 console.log("CURRENT USER:", user);

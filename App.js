@@ -20,7 +20,7 @@ import DrawerNavigator from "./src/navigations/DrawerNavigation";
 import UserDrawer from "./src/navigations/UserDrawer";
 // import ScheduleScreen from './src/screens/Survey/ScheduleScreen';
 // import RequestSurvey from './src/screens/Survey/RequestSurvey';
-
+import HomeScreen from "./src/screens/Home/HomeScreen";
 const Stack = createNativeStackNavigator();
 
 function RootNav() {
@@ -40,6 +40,7 @@ function RootNav() {
         <>
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="HomeScreen" component={HomeScreen}/>
         </>
       ) : user.role === 'admin' ? (
         <Stack.Screen name="AdminDrawer" component={AdminDrawer} />

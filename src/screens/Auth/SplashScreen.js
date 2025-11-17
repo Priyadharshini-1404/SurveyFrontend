@@ -10,12 +10,14 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
+import { useAuth } from "../../hooks/useAuth";
 
 const { width, height } = Dimensions.get("window");
 
-export default function SplashScreen() {
+export default function SplashScreen({ navigation }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
+  const { user } = useAuth(); // get logged-in user
 
   useEffect(() => {
     Animated.sequence([
@@ -33,7 +35,18 @@ export default function SplashScreen() {
         }),
       ]),
     ]).start();
-  }, []);
+
+    // Navigate after 3.2s (or your animation duration)
+    const timer = setTimeout(() => {
+      if (!user) {
+        navigation.replace("Login"); // go to Login if not logged in
+      } else {
+        navigation.replace("MainDrawer"); // go to MainDrawer or AdminDrawer based on user.role
+      }
+    }, 3200);
+
+    return () => clearTimeout(timer);
+  }, [fadeAnim, scaleAnim, navigation, user]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -44,19 +57,9 @@ export default function SplashScreen() {
         end={{ x: 1, y: 1 }}
         style={styles.gradient}
       >
-        {/* Background Image with soft overlay */}
-        {/* <Image
-          source={require("../../../assets/images/Splash.png")}
-          style={styles.backgroundImage}
-          blurRadius={1}
-        /> */}
-
         <View style={styles.overlay}>
           <Animated.View
-            style={[
-              styles.logoContainer,
-              { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
-            ]}
+            style={[styles.logoContainer, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}
           >
             <Image
               source={require("../../../assets/images/Splash.png")}
@@ -75,16 +78,15 @@ export default function SplashScreen() {
           <View style={styles.line} />
 
           <Animated.Text style={[styles.content, { opacity: fadeAnim }]}>
-            Submit and track your surveys seamlessly{"/n"}
-            Empowering modern surveying with{"\n"}
-            accuracy, innovation, and trust.  We would like to introduce ourselves, with dignity and pride, as one of
-          the experienced Survey consultant firms in Chennai,TamilNadu.
+            Submit and track your surveys seamlessly{"\n"}
+            Empowering modern surveying with accuracy, innovation, and trust.
           </Animated.Text>
         </View>
       </LinearGradient>
     </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   safeArea: {

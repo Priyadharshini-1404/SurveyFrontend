@@ -5,27 +5,27 @@ import { useAuth } from "../../hooks/useAuth";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function LoginScreen({ navigation }) {
-  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
- const handleLogin = async () => {
-  if (!email || !password) {
-    return Alert.alert("Validation", "Please enter email and password.");
-  }
+// LoginScreen.js
+const { login, redirectScreen, setRedirectScreen } = useAuth();
+
+const handleLogin = async () => {
+  if (!email || !password) return Alert.alert("Validation", "Enter email and password");
 
   try {
     const loggedUser = await login(email, password);
 
-    // If there's a redirect screen (user clicked Survey before login)
-    if (loggedUser && redirectScreen) {
-      navigation.replace(redirectScreen); // Navigate to originally requested screen
-      setRedirectScreen(null); // clear after navigation
+    // 🔹 If user clicked protected screen before login, redirect there
+    if (redirectScreen) {
+      navigation.replace(redirectScreen);
+      setRedirectScreen(null);
       return;
     }
 
-    // Role-based navigation
+    // 🔹 Otherwise go to admin or user panel
     if (loggedUser.role === "admin") {
       navigation.replace("AdminDrawer");
     } else {
@@ -35,6 +35,7 @@ export default function LoginScreen({ navigation }) {
     Alert.alert("Login Failed", err.message);
   }
 };
+
 
 
   return (

@@ -2,9 +2,15 @@ import React, { useEffect, useState } from "react";
 import { View, ActivityIndicator, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { resetTo } from "../../navigations/RootNavigation";
+// LogoutScreen.js
+import { useAuth } from "../../hooks/useAuth";
+
 
 export default function LogoutScreen() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+const { logout } = useAuth();
+
+
 
   useEffect(() => {
     const logout = () => {
@@ -17,13 +23,11 @@ export default function LogoutScreen() {
             text: "Yes",
             onPress: async () => {
               setIsLoggingOut(true);
-              try {
-                await AsyncStorage.clear();  // clear user token/data
-                resetTo("Login");           // reset root navigation
-              } catch (err) {
-                console.log(err);
-                setIsLoggingOut(false);
-              }
+               await logout();
+  navigation.reset({
+    index: 0,
+    routes: [{ name: "Home" }], // go to HomeScreen after logout
+  });
             },
           },
         ],
