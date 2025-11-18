@@ -1,7 +1,7 @@
 import axios from "axios";
 import { socket } from "./socket"; // ✅ make sure the path is correct
 
-const API_URL = "http://192.168.1.11:5000/api/notifications"; // same IP as socket.js
+const API_URL = "http://192.168.1.8:5000/api/notifications"; // same IP as socket.js
 
 // ✅ Send a new notification (DB + real-time)
 export const sendNotification = async (senderId, receiverId, message, type) => {

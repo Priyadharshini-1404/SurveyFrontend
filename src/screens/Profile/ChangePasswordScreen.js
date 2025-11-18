@@ -4,72 +4,66 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { BASE_URL } from "../../utils/API";
 import { useAuth } from "../../hooks/useAuth";
 
-export default function EditProfileScreen({ navigation }) {
-  const { user, setUser } = useAuth();
+export default function ChangePasswordScreen({ navigation }) {
+  const { user } = useAuth();
 
-  const [name, setName] = useState(user?.name || "");
-  const [phone, setPhone] = useState(user?.phone || "");
-  const [address, setAddress] = useState(user?.address || "");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
-  const handleSave = async () => {
+  const handleChangePassword = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/api/profile/update`, {
+      const response = await fetch(`${BASE_URL}/api/profile/password`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user?.token}`,
         },
-        body: JSON.stringify({ name, phone, address }),
+        body: JSON.stringify({ oldPassword, newPassword }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        setUser({ ...user, name, phone, address });
-        alert("Profile updated!");
+        alert("Password changed successfully!");
         navigation.goBack();
+      } else {
+        alert(data.message);
       }
     } catch (err) {
-      alert("Error updating profile");
       console.log(err);
+      alert("Error changing password");
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Edit Profile</Text>
+      <Text style={styles.title}>Change Password</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Full Name"
-        value={name}
-        onChangeText={(t) => setName(t)}
+        placeholder="Old Password"
+        secureTextEntry
+        value={oldPassword}
+        onChangeText={(t) => setOldPassword(t)}
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Phone Number"
-        keyboardType="phone-pad"
-        value={phone}
-        onChangeText={(t) => setPhone(t)}
+        placeholder="New Password"
+        secureTextEntry
+        value={newPassword}
+        onChangeText={(t) => setNewPassword(t)}
       />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Address"
-        value={address}
-        onChangeText={(t) => setAddress(t)}
-      />
-
-      <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-        <Text style={styles.saveText}>Save Changes</Text>
+      <TouchableOpacity style={styles.saveBtn} onPress={handleChangePassword}>
+        <Text style={styles.saveText}>Update Password</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 20 },
+  container: { flex: 1, padding: 20 },
   title: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
   input: {
     borderWidth: 1,

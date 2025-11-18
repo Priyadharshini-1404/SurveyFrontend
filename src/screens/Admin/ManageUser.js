@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ManageUsers() {
   const [users, setUsers] = useState([]);
@@ -28,7 +29,7 @@ export default function ManageUsers() {
   };
 
   const renderUser = ({ item }) => (
-    <View style={styles.userCard}>
+    <SafeAreaView style={styles.userCard}>
       <Text style={styles.name}>{item.name}</Text>
       <Text style={styles.email}>{item.email}</Text>
       <Text style={styles.role}>Role: {item.role}</Text>
@@ -49,7 +50,7 @@ export default function ManageUsers() {
           <Text style={styles.buttonText}>Remove</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 
   return (
@@ -66,7 +67,7 @@ export default function ManageUsers() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 16 },
+  container: { flex: 1, backgroundColor: "#fff", padding: 16  ,marginTop:20,},
   header: { fontSize: 24, fontWeight: "bold", marginBottom: 12 },
   userCard: {
     padding: 12,

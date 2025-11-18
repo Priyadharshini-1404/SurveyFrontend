@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useStaff } from "../../hooks/useStaff";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AddStaff() {
   const { staffList, addStaff, updateStaff, deleteStaff } = useStaff();
@@ -67,7 +68,7 @@ export default function AddStaff() {
   };
 
   const renderStaff = ({ item }) => (
-    <View style={styles.card}>
+    <SafeAreaView style={styles.card}>
       <Image
         source={item.image ? { uri: item.image } : require("../../../assets/abc.png")}
         style={styles.image}
@@ -86,11 +87,11 @@ export default function AddStaff() {
           <Ionicons name="trash-outline" size={22} color="red" />
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.header}>{editingStaff ? "Edit Staff" : "Add Staff"}</Text>
 
       <TextInput placeholder="Name" value={name} onChangeText={setName} style={styles.input} />
@@ -110,7 +111,7 @@ export default function AddStaff() {
         contentContainerStyle={{ paddingBottom: 100 }}
         style={{ marginTop: 20 }}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

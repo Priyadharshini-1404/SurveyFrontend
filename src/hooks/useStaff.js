@@ -1,51 +1,41 @@
-// src/hooks/useStaff.js
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
 
 const StaffContext = createContext();
 
 export const StaffProvider = ({ children }) => {
-  const [staffList, setStaffList] = useState([
-    // initial dummy data
-    {
-      id: "S001",
-      name: "John Doe",
-      experience: "5 years",
-      rating: 4,
-      contact: "+91 9876543210",
-      image: "", // can be empty or url
-    },
-    {
-      id: "S002",
-      name: "Jane Smith",
-      experience: "3 years",
-      rating: 5,
-      contact: "+91 9123456780",
-      image: "",
-    },
-  ]);
+  const [staffList, setStaffList] = useState([]);
 
-  // Add staff
-  const addStaff = (staff) => {
-    const newStaff = { ...staff, id: `S00${staffList.length + 1}` };
-    setStaffList((prev) => [...prev, newStaff]);
+  const fetchStaff = async () => {
+    try {
+      const res = await axios.get("http://192.168.1.8:5000/api/staff");
+      setStaffList(res.data);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  // Update staff
-  const updateStaff = (id, updatedStaff) => {
-    setStaffList((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, ...updatedStaff } : s))
-    );
+  useEffect(() => {
+    fetchStaff();
+  }, []);
+
+  const addStaff = async (staff) => {
+    const res = await axios.post("http://192.168.1.8:5000/api/staff", staff);
+    setStaffList((prev) => [...prev, res.data]);
   };
 
-  // Delete staff
-  const deleteStaff = (id) => {
+  const updateStaff = async (id, staff) => {
+    const res = await axios.put(`http://192.168.1.8:5000/api/staff/${id}`, staff);
+    setStaffList((prev) => prev.map((s) => (s.id === id ? res.data : s)));
+  };
+
+  const deleteStaff = async (id) => {
+    await axios.delete(`http://192.168.1.8:5000/api/staff/${id}`);
     setStaffList((prev) => prev.filter((s) => s.id !== id));
   };
 
   return (
-    <StaffContext.Provider
-      value={{ staffList, addStaff, updateStaff, deleteStaff }}
-    >
+    <StaffContext.Provider value={{ staffList, addStaff, updateStaff, deleteStaff, fetchStaff }}>
       {children}
     </StaffContext.Provider>
   );

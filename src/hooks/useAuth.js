@@ -1,4 +1,4 @@
-// hooks/useAuth.js
+// src/hooks/useAuth.js
 import React, { createContext, useState, useContext, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -8,7 +8,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [redirectScreen, setRedirectScreen] = useState(null); // for protected navigation
+  const [redirectScreen, setRedirectScreen] = useState(null);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
         const storedUser = await AsyncStorage.getItem("user");
         if (storedUser) setUser(JSON.parse(storedUser));
       } catch (err) {
-        console.log(err);
+        console.log("Error loading user:", err);
       } finally {
         setLoading(false);
       }
@@ -24,68 +24,81 @@ export const AuthProvider = ({ children }) => {
     loadUser();
   }, []);
 
+  // ---------------------------
+  // LOGIN FUNCTION
+  // ---------------------------
   const login = async (email, password) => {
     try {
-      const res = await axios.post("http://192.168.1.11:5000/api/auth/login", { email, password });
-      if (res.data.success) {
-        const u = {
-          id: res.data.id,
-          name: res.data.name,
-          email: res.data.email,
-          role: res.data.role,
-          token: res.data.token,
-        };
-        await AsyncStorage.setItem("user", JSON.stringify(u));
-        setUser(u);
-        return u;
-      } else {
-        throw new Error(res.data.message || "Login failed");
-      }
+      const res = await axios.post("http://192.168.1.8:5000/api/auth/login", {
+        email,
+        password,
+      });
+
+      if (!res.data.success) throw new Error(res.data.message);
+
+      const u = {
+        id: res.data.id,
+        name: res.data.name,
+        email: res.data.email,
+        role: res.data.role, // "admin" or "user"
+        token: res.data.token,
+      };
+
+      await AsyncStorage.setItem("user", JSON.stringify(u));
+      setUser(u);
+
+      return u;
     } catch (err) {
-      throw new Error(err.response?.data?.message || err.message || "Login error");
+      throw new Error(err.response?.data?.message || "Login failed");
     }
   };
 
-  const logout = async () => {
-    await AsyncStorage.removeItem("user");
-    setUser(null);
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, setUser, login, logout, loading, redirectScreen, setRedirectScreen }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-
-
-  // 🔹 Register
+  // ---------------------------
+  // REGISTER FUNCTION
+  // ---------------------------
   const register = async ({ name, email, password }) => {
     try {
-      const res = await axios.post("http://192.168.1.11:5000/api/auth/register", { name, email, password });
-      return res.data; // should return { success: true/false, message: "...", etc. }
+      const res = await axios.post("http://192.168.1.8:5000/api/auth/register", {
+        name,
+        email,
+        password,
+      });
+
+      return res.data;
     } catch (err) {
-      throw new Error(err.response?.data?.message || err.message || "Registration error");
+      throw new Error(err.response?.data?.message || "Registration failed");
     }
+  };
 
-
-  // 🔹 Logout
+  // ---------------------------
+  // LOGOUT FUNCTION
+  // ---------------------------
   const logout = async () => {
     try {
       await AsyncStorage.removeItem("user");
       setUser(null);
     } catch (err) {
-      console.log(err);
+      console.log("Logout error:", err);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, login, logout, register, loading }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        setUser,
+        login,
+        logout,
+        register,
+        loading,
+        redirectScreen,
+        setRedirectScreen,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-// 🔹 Correct named export
+// Access hook
 export const useAuth = () => useContext(AuthContext);

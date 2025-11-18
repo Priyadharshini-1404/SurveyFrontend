@@ -7,32 +7,42 @@ import { useStaff } from "../../hooks/useStaff";
 
 const SurveyBookingScreen = ({ route, navigation }) => {
   const { userName, contactNumber, surveyType, date, time, location, notes } = route.params || {};
-  const { staffList } = useStaff(); // ✅ live staff list
+  const { staffList } = useStaff(); // ✅ live staff from backend
   const [selectedStaff, setSelectedStaff] = useState(null);
 
   const advanceAmount = 1;
 
   const handleConfirm = () => {
     if (!selectedStaff) return alert("Please select a staff!");
-    navigation.navigate("Wallet", { userName, contactNumber, selectedStaff, surveyType, date, time, location, notes });
+    navigation.navigate("Wallet", {
+      userName,
+      contactNumber,
+      selectedStaff,
+      surveyType,
+      date,
+      time,
+      location,
+      notes,
+    });
   };
+
+  if (!staffList) return <Text style={{ textAlign: "center", marginTop: 50 }}>Loading staff...</Text>;
 
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
         data={staffList}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={
-          <View style={{ padding: 20 }}>
-            <Text style={styles.title}>👷 Choose Staff</Text>
-          </View>
-        }
+        keyExtractor={(item) => item.id.toString()}
+        ListHeaderComponent={<Text style={styles.title}>👷 Choose Staff</Text>}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={[styles.staffCard, selectedStaff?.id === item.id && styles.selectedCard]}
             onPress={() => setSelectedStaff(item)}
           >
-            <Image source={item.image ? { uri: item.image } : require("../../../assets/abc.png")} style={styles.staffImage} />
+            <Image
+              source={item.image ? { uri: item.image } : require("../../../assets/abc.png")}
+              style={styles.staffImage}
+            />
             <View style={{ flex: 1 }}>
               <Text style={styles.staffName}>{item.name}</Text>
               <Text>Experience: {item.experience}</Text>
@@ -46,7 +56,9 @@ const SurveyBookingScreen = ({ route, navigation }) => {
         )}
         ListFooterComponent={
           <TouchableOpacity style={styles.payButton} onPress={handleConfirm}>
-            <Text style={styles.payText}>{selectedStaff ? `Proceed ₹${advanceAmount}` : "Select Staff"}</Text>
+            <Text style={styles.payText}>
+              {selectedStaff ? `Proceed ₹${advanceAmount}` : "Select Staff"}
+            </Text>
           </TouchableOpacity>
         }
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
@@ -59,8 +71,17 @@ export default SurveyBookingScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f9f9f9" },
-  title: { fontSize: 22, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
-  staffCard: { flexDirection: "row", alignItems: "center", padding: 10, borderWidth: 1, borderColor: "#ddd", borderRadius: 10, marginBottom: 10, backgroundColor: "#fff" },
+  title: { fontSize: 22, fontWeight: "bold", textAlign: "center", marginVertical: 20 },
+  staffCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 10,
+    marginBottom: 10,
+    backgroundColor: "#fff",
+  },
   selectedCard: { borderColor: "#1E90FF", backgroundColor: "#E6F0FF" },
   staffImage: { width: 70, height: 70, borderRadius: 35, marginRight: 10 },
   staffName: { fontSize: 16, fontWeight: "bold" },

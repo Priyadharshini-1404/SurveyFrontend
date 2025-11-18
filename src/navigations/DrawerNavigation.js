@@ -8,8 +8,6 @@ import AboutUs from '../screens/Drawer/AboutUs';
 import ContactUs from '../screens/Drawer/ContactUs';
 import TermsScreen from '../screens/Drawer/TermsScreen';
 import PrivacyScreen from '../screens/Drawer/Privacy';
-import ChangePasswordScreen from '../screens/Drawer/ChangePassword';
-import LogoutScreen from '../screens/Home/Logout';
 
 const Drawer = createDrawerNavigator();
 
@@ -70,22 +68,8 @@ export default function DrawerNavigator() {
           drawerIcon: ({ color, size }) => <Ionicons name="lock-closed-outline" size={size} color={color} />,
         }}
       />
-      <Drawer.Screen
-        name="ChangePassword"
-        component={ChangePasswordScreen}
-        options={{
-          title: 'Change Password',
-          drawerIcon: ({ color, size }) => <Ionicons name="key-outline" size={size} color={color} />,
-        }}
-      />
-      <Drawer.Screen
-        name="Logout"
-        component={LogoutScreen}
-        options={{
-          title: 'Logout',
-          drawerIcon: ({ color, size }) => <Ionicons name="log-out-outline" size={size} color={color} />,
-        }}
-      />
+     
+      
     </Drawer.Navigator>
   );
 }

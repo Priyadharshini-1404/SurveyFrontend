@@ -1,5 +1,5 @@
 // src/services/appointmentService.js
-const BASE_URL = 'http://192.168.1.11:5000/api/appointments';
+const BASE_URL = 'http://192.168.1.8:5000/api/appointments';
 
 export const bookAppointment = async (appointmentData) => {
   try {

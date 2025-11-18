@@ -12,7 +12,7 @@ import MapPickerScreen from "../screens/Survey/MapPickerScreen";
 import WalletScreen from "../screens/Wallet/WalletScreen";
 import CardDetails from "../screens/Wallet/CardDetails";
 import SurveyBookingScreen from "../screens/Survey/SurveyBookingScreen";
-
+import LoginScreen from "../screens/Auth/LoginScreen";
 const Stack = createNativeStackNavigator();
 
 export default function UserStack() {
@@ -26,7 +26,15 @@ export default function UserStack() {
       <Stack.Screen name="MapPickerScreen" component={MapPickerScreen} />
       <Stack.Screen name="Wallet" component={WalletScreen} />
       <Stack.Screen name="CardDetails" component={CardDetails} />
-      <Stack.Screen name="SurveyBookingScreen" component={SurveyBookingScreen} />
+      <Stack.Screen name="LoginScreen" children={LoginScreen}/>
+      <Stack.Screen
+        name="SurveyBookingScreen"
+        component={SurveyBookingScreen}
+      />
+      <Stack.Screen name="Profile" component={ProfileScreen} />
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+      <Stack.Screen name="AdminProfile" component={AdminProfileScreen} />
     </Stack.Navigator>
   );
 }

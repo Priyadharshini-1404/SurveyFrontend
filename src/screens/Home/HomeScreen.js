@@ -37,7 +37,7 @@ export default function HomeScreen({ navigation }) {
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get("http://192.168.1.11:5000/api/notifications");
+      const response = await axios.get("http://192.168.1.8:5000/api/notifications");
       setNotifications(response.data);
       console.log(response.data);
     } catch (error) {
