@@ -2,15 +2,17 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useAuth } from "../hooks/useAuth";
 
-// Auth Screens
-import Login from "../screens/Auth/LoginScreen";
-import Register from "../screens/Auth/RegisterScreen";
+// Public Screens
 
-// Drawers
-import AdminDrawer from"../../src/navigations/AdminDrawer";
-import UserDrawer from "../../src/navigations/UserDrawer"; // Your user drawer
-import RequestSurvey from "../screens/Survey/RequestSurvey";
-import NotificationsScreen from "../screens/Home/NotificationScreen";
+// Private (after login)
+
+import SplashScreen from "./BeforeLogin/SplashScreen";
+import HomeScreen from "./BeforeLogin/HomeScreen";
+import RequestSurvey from "./BeforeLogin/RequestSurvey";
+import AppointmentScreen from "./BeforeLogin/ScheduleScreen";
+import LoginScreen from "./BeforeLogin/LoginScreen";
+import AdminDrawer from "./AfterLogin/AdminDrawer";
+import UserDrawer from "./AfterLogin/UserDrawer";
 
 const Stack = createNativeStackNavigator();
 
@@ -20,26 +22,29 @@ export default function RootNavigation() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
 
-      {/* NOT LOGGED IN */}
+      {/* BEFORE LOGIN (Public) */}
       {!user ? (
         <>
-          <Stack.Screen name="Login" component={Login} />
-          <Stack.Screen name="Register" component={Register} />
-          <Stack.Screen name="Notifications" component={NotificationsScreen}/>
+          <Stack.Screen name="Splash" component={SplashScreen} />
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="RequestSurvey" component={RequestSurvey} />
+          <Stack.Screen name="Appointment" component={AppointmentScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
         </>
       ) : (
         <>
-          {/* ADMIN ONLY */}
+          {/* AFTER LOGIN → ADMIN */}
           {user.role === "admin" && (
             <Stack.Screen name="AdminDrawer" component={AdminDrawer} />
           )}
 
-          {/* USER ONLY */}
+          {/* AFTER LOGIN → USER */}
           {user.role === "user" && (
-            <Stack.Screen name="MainDrawer" component={UserDrawer} />
+            <Stack.Screen name="UserDrawer" component={UserDrawer} />
           )}
         </>
       )}
+
     </Stack.Navigator>
   );
 }

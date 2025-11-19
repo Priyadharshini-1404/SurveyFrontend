@@ -6,7 +6,7 @@ import { resetTo } from "../../navigations/RootNavigation";
 import { useAuth } from "../../hooks/useAuth";
 
 
-export default function LogoutScreen() {
+export default function LogoutScreen({ navigation }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 const { logout } = useAuth();
 

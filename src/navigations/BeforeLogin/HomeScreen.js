@@ -14,8 +14,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SwiperFlatList } from 'react-native-swiper-flatlist';
-import RequestSurvey from "../Survey/RequestSurvey";
-import ScheduleScreen from "../Survey/ScheduleScreen";
+import RequestSurvey from "./RequestSurvey";
+import ScheduleScreen from "./ScheduleScreen";
 
 const { width } = Dimensions.get("window");
 
@@ -37,7 +37,7 @@ export default function HomeScreen({ navigation }) {
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get("http://192.168.1.8:5000/api/notifications");
+      const response = await axios.get("http://192.168.1.11:5000/api/notifications");
       setNotifications(response.data);
       console.log(response.data);
     } catch (error) {
@@ -65,21 +65,36 @@ console.log("CURRENT USER:", user);
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.container}>
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.openDrawer()}>
-            <Ionicons name="menu" size={24} color="black" />
-          </TouchableOpacity>
-          <Text style={styles.title}>ROCKFORT SURVEYS</Text>
-          <TouchableOpacity
-            onPress={() => handleNavigate("Notifications")}
-            style={styles.headerButton}
-          >
-            <Ionicons name="notifications-outline" size={28} color="#0a74da" />
-            {notifications.some(n => n.status === "unread") && (
-              <View style={styles.notificationBadge} />
-            )}
-          </TouchableOpacity>
-        </View>
+       <View style={styles.header}>
+  
+  {/* Hide menu if not logged in */}
+  {user ? (
+    <TouchableOpacity onPress={() => navigation.openDrawer()}>
+      <Ionicons name="menu" size={24} color="black" />
+    </TouchableOpacity>
+  ) : (
+    <View style={{ width: 24 }} />  // placeholder spacing
+  )}
+
+  <Text style={styles.title}>ROCKFORT SURVEYS</Text>
+
+  {/* Hide Notifications if not logged in */}
+  {user ? (
+    <TouchableOpacity
+      onPress={() => handleNavigate("Notifications")}
+      style={styles.headerButton}
+    >
+      <Ionicons name="notifications-outline" size={28} color="#0a74da" />
+      {notifications.some(n => n.status === "unread") && (
+        <View style={styles.notificationBadge} />
+      )}
+    </TouchableOpacity>
+  ) : (
+    <View style={{ width: 28 }} /> // placeholder spacing
+  )}
+
+</View>
+
 
         {/* Slideshow */}
         <View style={styles.sliderContainer}>

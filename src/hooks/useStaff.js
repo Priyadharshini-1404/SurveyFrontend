@@ -8,7 +8,7 @@ export const StaffProvider = ({ children }) => {
 
   const fetchStaff = async () => {
     try {
-      const res = await axios.get("http://192.168.1.8:5000/api/staff");
+      const res = await axios.get("http://192.168.1.11:5000/api/staff");
       setStaffList(res.data);
     } catch (err) {
       console.log(err);
@@ -20,17 +20,17 @@ export const StaffProvider = ({ children }) => {
   }, []);
 
   const addStaff = async (staff) => {
-    const res = await axios.post("http://192.168.1.8:5000/api/staff", staff);
+    const res = await axios.post("http://192.168.1.11:5000/api/staff", staff);
     setStaffList((prev) => [...prev, res.data]);
   };
 
   const updateStaff = async (id, staff) => {
-    const res = await axios.put(`http://192.168.1.8:5000/api/staff/${id}`, staff);
+    const res = await axios.put(`http://192.168.1.11:5000/api/staff/${id}`, staff);
     setStaffList((prev) => prev.map((s) => (s.id === id ? res.data : s)));
   };
 
   const deleteStaff = async (id) => {
-    await axios.delete(`http://192.168.1.8:5000/api/staff/${id}`);
+    await axios.delete(`http://192.168.1.11:5000/api/staff/${id}`);
     setStaffList((prev) => prev.filter((s) => s.id !== id));
   };
 

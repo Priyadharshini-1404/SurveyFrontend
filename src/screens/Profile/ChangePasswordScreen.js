@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { BASE_URL } from "../../utils/API";
 import { useAuth } from "../../hooks/useAuth";
 
 export default function ChangePasswordScreen({ navigation }) {
