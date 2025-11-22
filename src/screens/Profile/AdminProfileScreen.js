@@ -5,7 +5,7 @@ import { useAuth } from "../../hooks/useAuth";
 
 export default function AdminProfileScreen() {
   const { user } = useAuth();
-const BASE_URL="http://192.168.1.11:5000";
+const BASE_URL="http://192.168.1.5:5000";
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>

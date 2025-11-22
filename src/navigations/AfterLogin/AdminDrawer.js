@@ -29,15 +29,96 @@ export default function AdminDrawer() {
         }}
       />
 
-      <Drawer.Screen name="ManageUsers" component={ManageUser} />
-      <Drawer.Screen name="AddUser" component={AddUser} />
-      <Drawer.Screen name="AddStaff" component={AddStaff} />
-      <Drawer.Screen name="UsersList" component={UsersList} />
-      <Drawer.Screen name="AboutUs" component={AboutUs} />
-      <Drawer.Screen name="ContactUs" component={ContactUs} />
-      <Drawer.Screen name="Terms" component={TermsAndConditions} />
-      <Drawer.Screen name="Privacy" component={PrivacyPolicy} />
-      <Drawer.Screen name="Logout" component={LogoutScreen} />
+     <Drawer.Screen
+  name="ManageUsers"
+  component={ManageUser}
+  options={{
+    drawerIcon: ({ color, size }) => (
+      <Ionicons name="settings-outline" size={size} color={color} />
+    ),
+  }}
+/>
+
+<Drawer.Screen
+  name="AddUser"
+  component={AddUser}
+  options={{
+    drawerIcon: ({ color, size }) => (
+      <Ionicons name="person-add-outline" size={size} color={color} />
+    ),
+  }}
+/>
+
+<Drawer.Screen
+  name="AddStaff"
+  component={AddStaff}
+  options={{
+    drawerIcon: ({ color, size }) => (
+      <Ionicons name="person-add-outline" size={size} color={color} />
+    ),
+  }}
+/>
+
+<Drawer.Screen
+  name="UsersList"
+  component={UsersList}
+  options={{
+    drawerIcon: ({ color, size }) => (
+      <Ionicons name="people-outline" size={size} color={color} />
+    ),
+  }}
+/>
+
+<Drawer.Screen
+  name="AboutUs"
+  component={AboutUs}
+  options={{
+    drawerIcon: ({ color, size }) => (
+      <Ionicons name="information-circle-outline" size={size} color={color} />
+    ),
+  }}
+/>
+
+<Drawer.Screen
+  name="ContactUs"
+  component={ContactUs}
+  options={{
+    drawerIcon: ({ color, size }) => (
+      <Ionicons name="chatbubble-ellipses-outline" size={size} color={color} />
+    ),
+  }}
+/>
+
+<Drawer.Screen
+  name="Terms And Conditions"
+  component={TermsAndConditions}
+  options={{
+    drawerIcon: ({ color, size }) => (
+      <Ionicons name="document-text-outline" size={size} color={color} />
+    ),
+  }}
+/>
+
+<Drawer.Screen
+  name="Privacy And Policy"
+  component={PrivacyPolicy}
+  options={{
+    drawerIcon: ({ color, size }) => (
+      <Ionicons name="shield-checkmark-outline" size={size} color={color} />
+    ),
+  }}
+/>
+
+<Drawer.Screen
+  name="Logout"
+  component={LogoutScreen}
+  options={{
+    drawerIcon: ({ color, size }) => (
+      <Ionicons name="log-out-outline" size={size} color={color} />
+    ),
+  }}
+/>
+
     </Drawer.Navigator>
   );
 }

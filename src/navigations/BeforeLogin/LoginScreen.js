@@ -1,149 +1,71 @@
 // src/screens/Auth/LoginScreen.js
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { useAuth } from "../../hooks/useAuth";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function LoginScreen({ navigation }) {
+  const { login, redirectScreen, setRedirectScreen } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const { login, redirectScreen, setRedirectScreen } = useAuth();
-
   const handleLogin = async () => {
-    if (!email || !password)
-      return Alert.alert("Validation", "Enter email and password");
-
+    if (!email || !password) return Alert.alert("Validation", "Enter email and password");
     try {
-      const loggedUser = await login(email, password);
+      const loggedUser = await login(email.trim(), password);
+      if (!loggedUser) throw new Error("No user returned");
 
-      // Redirect if user tapped a protected screen earlier
+      // Priority: if user clicked a protected screen before login, route them there
       if (redirectScreen) {
-        navigation.replace(redirectScreen);
+        // go to drawer first, then navigate into the nested stack screen
+        if (loggedUser.role === "admin") {
+          navigation.replace("AdminDrawer");
+          // admin protected screens could be handled here if applicable
+        } else {
+          navigation.replace("UserDrawer");
+          // small delay to ensure drawer mounted, then navigate nested
+          setTimeout(() => {
+            navigation.navigate("UserDrawer", { screen: "UserStack", params: { screen: redirectScreen } });
+          }, 50);
+        }
         setRedirectScreen(null);
         return;
       }
 
-      // Redirect based on role
+      // Normal role-based routing
       if (loggedUser.role === "admin") {
-        navigation.replace("AdminDrawer"); // Your Admin tabs stack name
+        navigation.replace("AdminDrawer");
       } else {
-        navigation.replace("MainDrawer"); // Your User bottom tabs stack name
+        navigation.replace("UserDrawer");
       }
     } catch (err) {
-      Alert.alert("Login Failed", err.message);
+      Alert.alert("Login Failed", err.message || "Failed to login");
     }
   };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        padding: 20,
-        backgroundColor: "#f9f9f9",
-      }}
-    >
-      <Text
-        style={{
-          fontSize: 28,
-          fontWeight: "bold",
-          textAlign: "center",
-          marginBottom: 30,
-        }}
-      >
-        Welcome Back!
-      </Text>
+    <View style={{ flex: 1, justifyContent: "center", padding: 20 }}>
+      <Text style={{ fontSize: 28, fontWeight: "bold", textAlign: "center", marginBottom: 30 }}>Welcome Back!</Text>
 
-      {/* Email */}
-      <TextInput
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        style={{
-          borderWidth: 1,
-          marginBottom: 15,
-          padding: 12,
-          borderRadius: 8,
-          backgroundColor: "#fff",
-        }}
-      />
+      <TextInput placeholder="Email" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address"
+        style={{ borderWidth: 1, marginBottom: 15, padding: 12, borderRadius: 8, backgroundColor: "#fff" }} />
 
-      {/* Password */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          borderWidth: 1,
-          borderRadius: 8,
-          marginBottom: 20,
-          backgroundColor: "#fff",
-        }}
-      >
-        <TextInput
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry={!showPassword}
-          style={{ flex: 1, padding: 12 }}
-        />
-
-        <TouchableOpacity
-          onPress={() => setShowPassword(!showPassword)}
-          style={{ paddingHorizontal: 12 }}
-        >
-          <Ionicons
-            name={showPassword ? "eye-off" : "eye"}
-            size={24}
-            color="gray"
-          />
+      <View style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, borderRadius: 8, marginBottom: 20, backgroundColor: "#fff" }}>
+        <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry={!showPassword} style={{ flex: 1, padding: 12 }} />
+        <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ paddingHorizontal: 12 }}>
+          <Ionicons name={showPassword ? "eye-off" : "eye"} size={24} color="gray" />
         </TouchableOpacity>
       </View>
 
-      {/* Login Button */}
-      <TouchableOpacity
-        onPress={handleLogin}
-        style={{
-          backgroundColor: "#0a74da",
-          padding: 15,
-          borderRadius: 8,
-          marginBottom: 15,
-        }}
-      >
-        <Text
-          style={{
-            color: "#fff",
-            fontWeight: "bold",
-            fontSize: 16,
-            textAlign: "center",
-          }}
-        >
-          Login
-        </Text>
+      <TouchableOpacity onPress={handleLogin} style={{ backgroundColor: "#0a74da", padding: 15, borderRadius: 8, marginBottom: 15 }}>
+        <Text style={{ color: "#fff", fontWeight: "bold", textAlign: "center" }}>Login</Text>
       </TouchableOpacity>
 
-      {/* Register */}
       <View style={{ flexDirection: "row", justifyContent: "center" }}>
-        <Text style={{ fontSize: 14 }}>Don't have an account? </Text>
+        <Text>Don't have an account? </Text>
         <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-          <Text
-            style={{
-              color: "#0a74da",
-              fontWeight: "bold",
-              fontSize: 14,
-            }}
-          >
-            Sign Up
-          </Text>
+          <Text style={{ color: "#0a74da", fontWeight: "bold" }}>Sign Up</Text>
         </TouchableOpacity>
       </View>
     </View>

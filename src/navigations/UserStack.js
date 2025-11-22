@@ -12,11 +12,11 @@ import MapPickerScreen from "../screens/Survey/MapPickerScreen";
 import WalletScreen from "../screens/Wallet/WalletScreen";
 import CardDetails from "../screens/Wallet/CardDetails";
 import SurveyBookingScreen from "../screens/Survey/SurveyBookingScreen";
-import LoginScreen from "./BeforeLogin/LoginScreen";
 import ProfileScreen from "../screens/Profile/ProfileScreen";
 import EditProfileScreen from "../screens/Profile/EditProfileScreen";
 import ChangePasswordScreen from "../screens/Profile/ChangePasswordScreen";
 import AdminProfileScreen from "../screens/Profile/AdminProfileScreen";
+import AppTabs from "./AppTabs";
 
 
 const Stack = createNativeStackNavigator();
@@ -24,9 +24,10 @@ const Stack = createNativeStackNavigator();
 export default function UserStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-     <Stack.Screen name="UserHome" component={HomeScreen} />
+     <Stack.Screen name="HomeScreen" component={HomeScreen} />
+           <Stack.Screen name="UserTabs" component={AppTabs} />
+     
 <Stack.Screen name="RequestSurvey" component={RequestSurvey} />
-
       <Stack.Screen name="AppointmentScreen" component={AppointmentScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="ScheduleScreen" component={ScheduleScreen} />

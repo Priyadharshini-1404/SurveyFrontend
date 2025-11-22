@@ -37,7 +37,7 @@ export default function HomeScreen({ navigation }) {
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get("http://192.168.1.11:5000/api/notifications");
+      const response = await axios.get("http://192.168.1.5:5000/api/notifications");
       setNotifications(response.data);
       console.log(response.data);
     } catch (error) {
@@ -48,14 +48,26 @@ export default function HomeScreen({ navigation }) {
 // HomeScreen.js
 const handleNavigate = (screenName) => {
   if (!user) {
-    setRedirectScreen(screenName); // save intended screen
-    navigation.navigate("Login"); // go to login first
-  } else {
-    // logged-in user
-    navigation.navigate(screenName);
+    setRedirectScreen(screenName);
+    navigation.navigate("Login");
+    return;
   }
-};
 
+  // If ADMIN → open nested screens inside AdminStack
+  if (user.role === "admin") {
+    navigation.navigate("AdminDrawer", {
+      screen: "AdminStack",
+      params: { screen: screenName },
+    });
+    return;
+  }
+
+  // If USER → open nested screens inside UserStack
+  navigation.navigate("UserDrawer", {
+    screen: "UserStack",
+    params: { screen: screenName },
+  });
+};
 
 
 console.log("CURRENT USER:", user);
@@ -69,7 +81,8 @@ console.log("CURRENT USER:", user);
   
   {/* Hide menu if not logged in */}
   {user ? (
-    <TouchableOpacity onPress={() => navigation.openDrawer()}>
+    <TouchableOpacity onPress={() => navigation.getParent()?.openDrawer()
+}>
       <Ionicons name="menu" size={24} color="black" />
     </TouchableOpacity>
   ) : (

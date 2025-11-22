@@ -10,7 +10,7 @@ export default function UsersList({ navigation }) {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('http://192.168.1.11:5000/api/users', authHeaders());
+      const res = await axios.get('http://192.168.1.5:5000/api/users', authHeaders());
       setUsers(res.data);
     } catch (err) { console.log(err); }
   };
@@ -19,14 +19,14 @@ export default function UsersList({ navigation }) {
 
   const promote = async (id) => {
     try {
-      await axios.put(`http://192.168.1.11:5000/api/users/role/${id}`, { role: 'admin' }, authHeaders());
+      await axios.put(`http://192.168.1.5:5000/api/users/role/${id}`, { role: 'admin' }, authHeaders());
       fetchUsers();
     } catch (err) { console.log(err); }
   };
 
   const remove = async (id) => {
     try {
-      await axios.delete(`http://192.168.1.11:5000/api/users/${id}`, authHeaders());
+      await axios.delete(`http://192.168.1.5:5000/api/users/${id}`, authHeaders());
       fetchUsers();
     } catch (err) { console.log(err); }
   };

@@ -37,8 +37,14 @@ export default function SplashScreen({ navigation }) {
     ]).start();
 
     // Navigate after 3.2s (or your animation duration)
-   const timer = setTimeout(() => {
-  navigation.replace("Home"); // ALWAYS go to HomeScreen
+  const timer = setTimeout(() => {
+  if (!user) {
+    navigation.replace("Home");     // Public Home
+  } else if (user.role === "admin") {
+    navigation.replace("AdminDrawer");
+  } else {
+    navigation.replace("UserDrawer");
+  }
 }, 3200);
 
 

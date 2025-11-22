@@ -24,7 +24,7 @@ export default function WalletScreen({ route, navigation }) {
   // ✅ Updated handleSubmit (removed surveyId)
   const handleSubmit = async (paymentStatus = "Success") => {
     try {
-      const res = await fetch("http://192.168.1.11:5000/api/payments", {
+      const res = await fetch("http://192.168.1.5:5000/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

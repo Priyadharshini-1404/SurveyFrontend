@@ -1,41 +1,39 @@
+// src/screens/Home/Logout.js
 import React, { useEffect, useState } from "react";
 import { View, ActivityIndicator, Alert } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { resetTo } from "../../navigations/RootNavigation";
-// LogoutScreen.js
 import { useAuth } from "../../hooks/useAuth";
-
 
 export default function LogoutScreen({ navigation }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-const { logout } = useAuth();
-
-
+  const { logout } = useAuth();
 
   useEffect(() => {
-    const logout = () => {
+    const doLogout = () => {
       Alert.alert(
         "Logout",
         "Are you sure you want to logout?",
         [
-          { text: "Cancel", style: "cancel" },
+          { text: "Cancel", style: "cancel", onPress: () => navigation.goBack() },
           {
             text: "Yes",
             onPress: async () => {
               setIsLoggingOut(true);
-               await logout();
-  navigation.reset({
-    index: 0,
-    routes: [{ name: "Home" }], // go to HomeScreen after logout
-  });
+              await logout();
+              setIsLoggingOut(false);
+              // reset to Home public screen
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "Home" }],
+              });
             },
           },
         ],
-        { cancelable: false }
+        { cancelable: true }
       );
     };
-
-    setTimeout(logout, 200);
+    // slight delay so UI shows
+    const t = setTimeout(doLogout, 200);
+    return () => clearTimeout(t);
   }, []);
 
   return (
