@@ -27,7 +27,11 @@ export default function UserStack() {
      <Stack.Screen name="HomeScreen" component={HomeScreen} />
            <Stack.Screen name="UserTabs" component={AppTabs} />
      
-<Stack.Screen name="RequestSurvey" component={RequestSurvey} />
+<Stack.Screen
+  name="RequestSurvey"
+  component={RequestSurvey}
+  options={{ freezeOnBlur: true }}
+/>
       <Stack.Screen name="AppointmentScreen" component={AppointmentScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="ScheduleScreen" component={ScheduleScreen} />

@@ -1,9 +1,10 @@
 // src/hooks/useAuth.js
 import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 const AuthContext = createContext();
-const API_URL = "http://192.168.1.5:5000/api/auth"; // adjust if needed
+const BASE_URL = `${API_URL}/auth`; // adjust if needed
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null); // { id,name,email,role }
@@ -23,7 +24,7 @@ export const AuthProvider = ({ children }) => {
           return;
         }
         // call /me
-        const res = await fetch(`${API_URL}/me`, {
+        const res = await fetch(`${BASE_URL}/me`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
 
@@ -36,7 +37,7 @@ export const AuthProvider = ({ children }) => {
           const refreshed = await tryRefresh();
           if (refreshed) {
             const newToken = await AsyncStorage.getItem("accessToken");
-            const retry = await fetch(`${API_URL}/me`, {
+            const retry = await fetch(`${BASE_URL}/me`, {
               headers: { Authorization: `Bearer ${newToken}` },
             });
             if (retry.ok) {
@@ -89,7 +90,7 @@ export const AuthProvider = ({ children }) => {
       const refreshToken = await AsyncStorage.getItem("refreshToken");
       if (!refreshToken) return false;
 
-      const res = await fetch(`${API_URL}/refresh-token`, {
+      const res = await fetch(`${BASE_URL}/refresh-token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: refreshToken }),
@@ -115,7 +116,7 @@ export const AuthProvider = ({ children }) => {
 
   // LOGIN: store access + refresh tokens and set profile
   const login = async (email, password) => {
-    const res = await fetch(`${API_URL}/login`, {
+    const res = await fetch(`${BASE_URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -148,6 +149,20 @@ export const AuthProvider = ({ children }) => {
     return profileObj;
   };
 
+  const register = async ({ name, email, password, role = "user" }) => {
+  const res = await fetch(`${BASE_URL}/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password, role }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Registration failed");
+
+  return data; // { success, user }
+};
+
+
   const logout = async () => {
     await clearAll();
   };
@@ -161,6 +176,7 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         tryRefresh,
+        register, 
         redirectScreen,
         setRedirectScreen,
       }}

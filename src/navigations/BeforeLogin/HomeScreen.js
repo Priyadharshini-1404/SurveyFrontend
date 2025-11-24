@@ -16,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { SwiperFlatList } from 'react-native-swiper-flatlist';
 import RequestSurvey from "./RequestSurvey";
 import ScheduleScreen from "./ScheduleScreen";
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 const { width } = Dimensions.get("window");
 
@@ -37,7 +38,7 @@ export default function HomeScreen({ navigation }) {
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get("http://192.168.1.5:5000/api/notifications");
+      const response = await axios.get(`${API_URL}/notifications`);
       setNotifications(response.data);
       console.log(response.data);
     } catch (error) {

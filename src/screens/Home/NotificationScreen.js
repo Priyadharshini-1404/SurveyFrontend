@@ -3,12 +3,16 @@ import { View, Text, FlatList, StyleSheet } from "react-native";
 import { socket } from "../../services/socket";
 import { fetchNotifications } from "../../services/notificationService";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function NotificationsScreen() {
-  const userId = 3; // logged-in user
+  const { user } = useAuth();       // ⬅️ get logged-in user
+  const userId = user?.id;          // ⬅️ dynamic ID
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
+    if (!userId) return; // Wait for user to load
+
     socket.emit("register", userId);
 
     // Fetch initial notifications
@@ -18,27 +22,34 @@ export default function NotificationsScreen() {
     };
     load();
 
-    // Listen for new real-time notifications
+    // Listen for socket events
     socket.on("receiveNotification", (data) => {
       setNotifications((prev) => [
-        { id: Date.now(), message: data.message, createdAt: new Date() },
+        {
+          id: Date.now(),
+          message: data.message,
+          createdAt: new Date(),
+        },
         ...prev,
       ]);
     });
 
     return () => socket.off("receiveNotification");
-  }, []);
+  }, [userId]); // ⬅️ runs again only when userId loads
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>Notifications</Text>
+
       <FlatList
         data={notifications}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <Text style={styles.message}>{item.message}</Text>
-            <Text style={styles.date}>{new Date(item.createdAt).toLocaleString()}</Text>
+            <Text style={styles.date}>
+              {new Date(item.createdAt).toLocaleString()}
+            </Text>
           </View>
         )}
       />

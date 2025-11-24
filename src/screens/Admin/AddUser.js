@@ -3,6 +3,7 @@ import {View, TextInput, Button, Alert} from 'react-native';
 import { useAuth } from "../../hooks/useAuth";
 import axios from 'axios';
 import { SafeAreaView } from 'react-native-safe-area-context';
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function AddUser({ navigation }) {
   const { authHeaders } = useAuth();
@@ -13,7 +14,7 @@ export default function AddUser({ navigation }) {
 
   const submit = async () => {
     try {
-      await axios.post('http://192.168.1.5:5000/api/users/admin/add',
+      await axios.post(`${API_URL}/users/admin/add`,
         { name, email, password, role }, authHeaders());
       Alert.alert('Added');
       navigation.goBack();

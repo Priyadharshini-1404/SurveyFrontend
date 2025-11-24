@@ -1,5 +1,6 @@
 // src/services/appointmentService.js
-const BASE_URL = 'http://192.168.1.5:5000/api/appointments';
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const BASE_URL = `${API_URL}/appointments`;
 
 export const bookAppointment = async (appointmentData) => {
   try {

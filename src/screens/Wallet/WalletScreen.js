@@ -1,120 +1,119 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Modal,
   Alert,
-  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import RazorpayCheckout from "react-native-razorpay";
+
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function WalletScreen({ route, navigation }) {
-  const { selectedStaff, surveyType, date, time, location, notes, userName, contactNumber } =
-    route.params || {};
+  const {
+    selectedStaff,
+    surveyType,
+    date,
+    time,
+    location,
+    notes,
+    userName,
+    contactNumber,
+  } = route.params || {};
 
-  const [paymentType, setPaymentType] = useState("");
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const amount = 10; // advance amount
 
-  const advanceAmount = 10;
-  const amount = advanceAmount;
-
-  // ✅ Updated handleSubmit (removed surveyId)
-  const handleSubmit = async (paymentStatus = "Success") => {
+  // --------------------------
+  // Razorpay Payment
+  // --------------------------
+  const startRazorpayPayment = async () => {
     try {
-      const res = await fetch("http://192.168.1.5:5000/api/payments", {
+      // 1️⃣ Create Razorpay Order from Backend
+      const orderRes = await fetch(`${API_URL}payments/order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userName, // from route.params
-          contactNumber,
           amount,
+          userName,
           surveyType,
-          paymentType,
-          paymentStatus,
-          selectedStaff: selectedStaff?.name || "",
-          date,
-          time,
-          location,
-          notes,
         }),
       });
 
-      const data = await res.json();
-      Alert.alert("Payment", data.message || "Payment recorded successfully!");
-      navigation.navigate("MainApp");
-    } catch (error) {
-      console.error("Submit Error:", error);
-      Alert.alert("Error", "Failed to store payment details");
-    }
-  };
+      const data = await orderRes.json();
 
-  // ✅ Handle UPI payment
-  const handleGPayPayment = async () => {
-    const upiId = "priyasan170594@axl"; // replace if needed
-    const name = "SurveyServices";
-    const note = "Survey Advance Payment";
-
-    const url = `upi://pay?pa=${upiId}&pn=${name}&am=${advanceAmount}&cu=INR&tn=${note}`;
-
-    try {
-      const supported = await Linking.canOpenURL(url);
-      if (supported) {
-        await Linking.openURL(url);
-        Alert.alert(
-          "Complete Payment",
-          "Once you've finished paying in GPay, return to this app and tap 'Confirm Payment'."
-        );
-      } else {
-        Alert.alert("Error", "No UPI app found (GPay, PhonePe, etc.)");
+      if (!data.order) {
+        Alert.alert("Error", "Unable to create order");
+        return;
       }
+
+      // 2️⃣ Razorpay Checkout Options
+      var options = {
+        name: "Survey Services",
+        description: surveyType,
+        currency: "INR",
+        key: data.key, // Razorpay Key ID
+        amount: data.order.amount, // Must be in paise
+        order_id: data.order.id,
+        prefill: {
+          name: userName,
+          contact: contactNumber,
+        },
+        theme: { color: "#0a74da" },
+      };
+
+      // 3️⃣ Open Razorpay Checkout
+      RazorpayCheckout.open(options)
+        .then(async (res) => {
+          // 4️⃣ Verify Payment on Backend
+          await fetch(`${API_URL}payments/verify`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              razorpay_payment_id: res.razorpay_payment_id,
+              razorpay_order_id: res.razorpay_order_id,
+              razorpay_signature: res.razorpay_signature,
+
+              // extra booking fields
+              userName,
+              contactNumber,
+              surveyType,
+              selectedStaff: selectedStaff?.name,
+              date,
+              time,
+              location,
+              notes,
+              amount,
+            }),
+          });
+
+          Alert.alert("Success", "Payment Successful!");
+          navigation.navigate("MainApp");
+        })
+        .catch((err) => {
+          Alert.alert("Payment Failed", err.description);
+        });
     } catch (error) {
-      console.error("Error launching UPI:", error);
-      Alert.alert("Error", "Could not open UPI payment app.");
+      console.log(error);
+      Alert.alert("Error", "Failed to start Razorpay.");
     }
   };
 
-const handlePaymentSelect = (method) => {
-  setPaymentType(method);
-  setShowPaymentModal(false);
-
-  if (method === "Credit / Debit Card") {
-    // ✅ Just navigate, don't submit yet
-    navigation.navigate("CardDetails", {
-      selectedStaff,
-      surveyType,
-      date,
-      time,
-      location,
-      notes,
-      amount: advanceAmount,
-      userName,
-    });
-  } else if (method === "GPay / PhonePe") {
-    handleGPayPayment(); // opens UPI
-  } else {
-    // Save immediately for other methods
-    Alert.alert(method, `Selected ${method}`, [
-      { text: "OK", onPress: () => handleSubmit("Pending") },
-    ]);
-  }
-};
-
-
-
-
+  // --------------------------
+  // UI Rendering
+  // --------------------------
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>💳 Payment Summary</Text>
 
       <View style={styles.card}>
         <Text style={styles.label}>User Name:</Text>
-        <TextInput style={styles.input} value={userName || ""} editable={false} />
-         
-         <Text style={styles.label}>Contact:</Text>
-         <TextInput style={styles.input} value={contactNumber || ""} editable={false}/>
+        <TextInput style={styles.input} value={userName} editable={false} />
+
+        <Text style={styles.label}>Contact:</Text>
+        <TextInput style={styles.input} value={contactNumber} editable={false} />
 
         <Text style={styles.label}>Staff:</Text>
         <TextInput
@@ -124,73 +123,28 @@ const handlePaymentSelect = (method) => {
         />
 
         <Text style={styles.label}>Survey Type:</Text>
-        <TextInput
-          style={styles.input}
-          value={surveyType || ""}
-          editable={false}
-        />
+        <TextInput style={styles.input} value={surveyType} editable={false} />
 
         <Text style={styles.label}>Date:</Text>
-        <TextInput style={styles.input} value={date || ""} editable={false} />
+        <TextInput style={styles.input} value={date} editable={false} />
 
         <Text style={styles.label}>Time:</Text>
-        <TextInput style={styles.input} value={time || ""} editable={false} />
+        <TextInput style={styles.input} value={time} editable={false} />
 
         <Text style={styles.label}>Location:</Text>
         <TextInput
           style={[styles.input, { height: 60 }]}
-          value={location || ""}
+          value={location}
           editable={false}
           multiline
         />
 
         <Text style={styles.label}>Amount (Advance):</Text>
-        <TextInput
-          style={styles.input}
-          value={`₹${advanceAmount}`}
-          editable={false}
-        />
+        <TextInput style={styles.input} value={`₹${amount}`} editable={false} />
 
-        <Text style={styles.label}>Select Payment Method:</Text>
-        <TouchableOpacity
-          style={styles.dropdown}
-          onPress={() => setShowPaymentModal(true)}
-        >
-          <Text style={styles.dropdownText}>
-            {paymentType || "Choose Payment Method"}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Modal for selecting payment method */}
-        <Modal visible={showPaymentModal} transparent animationType="fade">
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              {[
-                "Credit / Debit Card",
-                "Digital Wallet",
-                "Bank Transfer",
-                "GPay / PhonePe",
-              ].map((method) => (
-                <TouchableOpacity
-                  key={method}
-                  onPress={() => handlePaymentSelect(method)}
-                >
-                  <Text style={styles.modalItem}>{method}</Text>
-                </TouchableOpacity>
-              ))}
-              <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
-                <Text style={styles.closeButton}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-
-        {/* Manual submit fallback */}
-        <TouchableOpacity
-          style={[styles.submitButton, { backgroundColor: "#28a745" }]}
-          onPress={() => handleSubmit("Success")}
-        >
-          <Text style={styles.submitText}>Confirm Payment</Text>
+        {/* PAY BUTTON */}
+        <TouchableOpacity style={styles.payButton} onPress={startRazorpayPayment}>
+          <Text style={styles.payText}>Pay ₹{amount}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -216,43 +170,16 @@ const styles = StyleSheet.create({
     marginTop: 5,
     backgroundColor: "#fff",
   },
-  dropdown: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 5,
-  },
-  dropdownText: { fontSize: 16, color: "#333" },
-  submitButton: {
+  payButton: {
     backgroundColor: "#0a74da",
-    padding: 14,
+    padding: 15,
     borderRadius: 8,
     marginTop: 20,
     alignItems: "center",
   },
-  submitText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalContent: {
-    margin: 30,
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 20,
-  },
-  modalItem: {
-    padding: 10,
-    fontSize: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  closeButton: {
-    marginTop: 10,
-    textAlign: "center",
-    color: "#0a74da",
+  payText: {
+    color: "#fff",
+    fontSize: 18,
     fontWeight: "bold",
   },
 });

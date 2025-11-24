@@ -1,16 +1,29 @@
 import axios from "axios";
 import { socket } from "./socket"; // ✅ make sure the path is correct
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL;  
 
-const API_URL = "http://192.168.1.5:5000/api/notifications"; // same IP as socket.js
+const API_URL =  `${BASE_URL}/notifications`; // same IP as socket.js
 
-// ✅ Send a new notification (DB + real-time)
-export const sendNotification = async (senderId, receiverId, message, type) => {
+// Save to DB
+export const sendNotificationToDB = async (senderId, receiverId, message, type) => {
   try {
-    await axios.post(API_URL, { senderId, receiverId, message, type }); // Save to DB
-    socket.emit("sendNotification", { receiverId, message, type }); // Real-time send
-    console.log("✅ Notification sent successfully:", message);
-  } catch (error) {
-    console.error("❌ Error sending notification:", error);
+    await axios.post(`${API_URL}/api/notifications`, {
+      senderId,
+      receiverId,
+      message,
+      type,
+    });
+  } catch (err) {
+    console.log("Failed to save notification:", err);
+  }
+};
+export const getAllAdmins = async () => {
+  try {
+    const res = await axios.get(`${API_URL}/api/auth/admins`);
+    return res.data; // [{id:1}, {id:2}, {id:3}]
+  } catch (err) {
+    console.log("Error fetching admins:", err);
+    return [];
   }
 };
 

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function CardDetailsScreen({ route, navigation }) {
   const { userName, contactNumber, surveyType, amount } = route.params || {};
@@ -17,7 +18,7 @@ export default function CardDetailsScreen({ route, navigation }) {
     }
 
    try {
-  const res = await fetch("http://192.168.1.5:5000/api/cardpayments", {
+  const res = await fetch(`${API_URL}/cardpayments`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
