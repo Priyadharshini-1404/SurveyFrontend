@@ -7,25 +7,30 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+
+ 
+
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.survey.surveyfrontend",
       "config": {
-        "googleMapsApiKey": "AIzaSyDTzQotI9jT4hhPYu1Wp5xUUcDR2mpzf_4"
+        "googleMapsApiKey": ""
       }
     },
+
     "android": {
       "package": "com.survey.surveyfrontend",
-       
-      "permissions": [  "ACCESS_FINE_LOCATION",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION"],
-    
+        "ACCESS_BACKGROUND_LOCATION"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -33,13 +38,15 @@
       "edgeToEdgeEnabled": true,
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyDTzQotI9jT4hhPYu1Wp5xUUcDR2mpzf_4"
+          "apiKey": ""
         }
       }
     },
+
     "web": {
       "favicon": "./assets/favicon.png"
     },
+
     "extra": {
       "eas": {
         "projectId": "d50db4d6-e71c-4ed0-8ca0-5f0f95348f76"

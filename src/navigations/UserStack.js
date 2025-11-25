@@ -17,7 +17,7 @@ import EditProfileScreen from "../screens/Profile/EditProfileScreen";
 import ChangePasswordScreen from "../screens/Profile/ChangePasswordScreen";
 import AdminProfileScreen from "../screens/Profile/AdminProfileScreen";
 import AppTabs from "./AppTabs";
-
+import RazorpayWeb from "../screens/RazorpayWeb";
 
 const Stack = createNativeStackNavigator();
 
@@ -42,6 +42,8 @@ export default function UserStack() {
         name="SurveyBookingScreen"
         component={SurveyBookingScreen}
       />
+      <Stack.Screen name="RazorpayWeb" component={RazorpayWeb} options={{ headerShown: false }} />
+
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
