@@ -10,7 +10,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import RazorpayCheckout from "react-native-razorpay";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+// ⚠️ Use your backend API URL here (make sure the device can reach it)
+const API_URL = "http://192.168.1.7:5000/api/";  
 
 export default function WalletScreen({ route, navigation }) {
   const {
@@ -31,6 +32,8 @@ export default function WalletScreen({ route, navigation }) {
   // --------------------------
   const startRazorpayPayment = async () => {
     try {
+      console.log("Starting Razorpay Payment...");
+
       // 1️⃣ Create Razorpay Order from Backend
       const orderRes = await fetch(`${API_URL}payments/order`, {
         method: "POST",
@@ -43,19 +46,20 @@ export default function WalletScreen({ route, navigation }) {
       });
 
       const data = await orderRes.json();
+      console.log("Order Response:", data);
 
-      if (!data.order) {
+      if (!data || !data.order) {
         Alert.alert("Error", "Unable to create order");
         return;
       }
 
       // 2️⃣ Razorpay Checkout Options
-      var options = {
+      const options = {
         name: "Survey Services",
         description: surveyType,
         currency: "INR",
         key: data.key, // Razorpay Key ID
-        amount: data.order.amount, // Must be in paise
+        amount: data.order.amount, // in paise
         order_id: data.order.id,
         prefill: {
           name: userName,
@@ -67,16 +71,16 @@ export default function WalletScreen({ route, navigation }) {
       // 3️⃣ Open Razorpay Checkout
       RazorpayCheckout.open(options)
         .then(async (res) => {
+          console.log("Payment Success:", res);
+
           // 4️⃣ Verify Payment on Backend
-          await fetch(`${API_URL}payments/verify`, {
+          const verifyRes = await fetch(`${API_URL}payments/verify`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               razorpay_payment_id: res.razorpay_payment_id,
               razorpay_order_id: res.razorpay_order_id,
               razorpay_signature: res.razorpay_signature,
-
-              // extra booking fields
               userName,
               contactNumber,
               surveyType,
@@ -89,15 +93,23 @@ export default function WalletScreen({ route, navigation }) {
             }),
           });
 
-          Alert.alert("Success", "Payment Successful!");
-          navigation.navigate("MainApp");
+          const verifyData = await verifyRes.json();
+          console.log("Verify Response:", verifyData);
+
+          if (verifyData.success) {
+            Alert.alert("Success", "Payment Successful!");
+            navigation.navigate("MainApp");
+          } else {
+            Alert.alert("Error", "Payment verification failed.");
+          }
         })
         .catch((err) => {
-          Alert.alert("Payment Failed", err.description);
+          console.error("Razorpay Error:", err);
+          Alert.alert("Payment Failed", err?.description || "Unknown error");
         });
     } catch (error) {
-      console.log(error);
-      Alert.alert("Error", "Failed to start Razorpay.");
+      console.error("Start Razorpay Error:", error);
+      Alert.alert("Error", "Failed to start Razorpay. Check console for details.");
     }
   };
 
