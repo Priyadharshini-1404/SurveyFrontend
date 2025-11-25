@@ -1,160 +1,68 @@
-import React from "react";
-import {
-  View,
-  Text,
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-} from "react-native";
-import { WebView } from "react-native-webview";
+// RazorpayWeb.js
+import React, { useRef, useState, useEffect } from "react";
+import { View, BackHandler, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { WebView } from "react-native-webview";
+import { Ionicons } from "@expo/vector-icons";
+
+const API_URL = process.env.EXPO_PUBLIC_API_URL; // ✅ Use your backend URL
 
 export default function RazorpayWeb({ route, navigation }) {
-  const {
-    orderId,
-    amount,
-    key,
-    userName,
-    contactNumber,
-  } = route.params || {};
+  const { orderId, amount } = route.params;
 
-  const htmlCode = `
-    <html>
-      <body style="background:#ffffff;">
-        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-        <script>
-          var options = {
-            key: "${key}",
-            order_id: "${orderId}",
-            amount: "${amount}",
-            currency: "INR",
-            
-            name: "Survey Booking",
-            description: "Advance Payment for Survey",
+  const paymentUrl = `${API_URL.replace(/\/$/, "")}/razorpay-checkout?orderId=${orderId}&amount=${amount}`;
 
-            prefill: {
-              name: "${userName}",
-              contact: "${contactNumber}"
-            },
+  const webViewRef = useRef(null);
+  const [canGoBack, setCanGoBack] = useState(false);
 
-            method: {
-              netbanking: true,
-              card: true,
-              upi: true,
-              wallet: true
-            },
+  // Handle Android Back Button
+  useEffect(() => {
+    const backAction = () => {
+      if (canGoBack && webViewRef.current) {
+        webViewRef.current.goBack();
+        return true;
+      }
+      return false;
+    };
 
-            theme: { color: "#0a74da" },
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
 
-            handler: function (response) {
-              window.ReactNativeWebView.postMessage(JSON.stringify({
-                success: true,
-                orderId: response.razorpay_order_id,
-                paymentId: response.razorpay_payment_id
-              }));
-            },
-
-            modal: {
-              ondismiss: function () {
-                window.ReactNativeWebView.postMessage(JSON.stringify({
-                  success: false,
-                  closed: true
-                }));
-              }
-            }
-          };
-
-          var rzp = new Razorpay(options);
-          rzp.open();
-        </script>
-      </body>
-    </html>
-  `;
-
-  const handleWebMessage = (event) => {
-    const data = JSON.parse(event.nativeEvent.data);
-
-    if (data.success) {
-      Alert.alert("Payment Successful", "Your payment is completed", [
-        {
-          text: "OK",
-          onPress: () => navigation.replace("WalletScreen"),
-        },
-      ]);
-    }
-
-    if (data.closed) {
-      Alert.alert("Payment Cancelled", "You closed the Razorpay window", [
-        { text: "OK", onPress: () => navigation.goBack() },
-      ]);
-    }
-  };
+    return () => backHandler.remove();
+  }, [canGoBack]);
 
   return (
-    <SafeAreaView style={styles.mainContainer}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+      
+      {/* Back Button */}
+      <TouchableOpacity
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          padding: 15,
+        }}
+        onPress={() => {
+          if (canGoBack && webViewRef.current) {
+            webViewRef.current.goBack();
+          } else {
+            navigation.goBack();
+          }
+        }}
+      >
+        <Ionicons name="arrow-back" size={26} color="#000" />
+        <Text style={{ marginLeft: 10, fontSize: 18 }}>Payment</Text>
+      </TouchableOpacity>
 
-      {/* Custom Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Complete Payment</Text>
-      </View>
-
+      {/* Razorpay Checkout */}
       <WebView
-        source={{ html: htmlCode }}
-        onMessage={handleWebMessage}
-        style={{ flex: 1 }}
-        startInLoadingState
-        renderLoading={() => (
-          <View style={styles.loaderWrapper}>
-            <View style={styles.loaderBox}>
-              <ActivityIndicator size="large" />
-              <Text style={styles.loaderText}>Processing payment...</Text>
-            </View>
-          </View>
-        )}
+        ref={webViewRef}
+        source={{ uri: paymentUrl }}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        onNavigationStateChange={(navState) => setCanGoBack(navState.canGoBack)}
       />
-
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  mainContainer: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-  },
-
-  header: {
-    backgroundColor: "#0a74da",
-    padding: 18,
-    alignItems: "center",
-    borderBottomLeftRadius: 14,
-    borderBottomRightRadius: 14,
-  },
-
-  headerTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-
-  loaderWrapper: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#ffffff",
-  },
-
-  loaderBox: {
-    backgroundColor: "#f3f3f3",
-    padding: 20,
-    borderRadius: 16,
-    alignItems: "center",
-    elevation: 4,
-  },
-
-  loaderText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: "#555",
-  },
-});
