@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const API_URL = "http://192.168.1.7:5000/api/";
+const API_URL = "http://192.168.1.9:5000/api/";
 
 export default function WalletScreen({ route, navigation }) {
   const {
