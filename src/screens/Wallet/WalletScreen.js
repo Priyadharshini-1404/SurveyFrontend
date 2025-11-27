@@ -26,39 +26,13 @@ export default function WalletScreen({ route, navigation }) {
 
   const amount = 10;
 
-  const startRazorpayPayment = async () => {
-    try {
-      console.log("Creating order on backend...");
-
-      const orderRes = await fetch(`${API_URL}payments/order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount,
-          userName,
-          surveyType,
-        }),
-      });
-
-      if (!orderRes.ok) {
-        const txt = await orderRes.text();
-        console.log("Order creation failed:", txt);
-        Alert.alert("Error", "Unable to create order.");
-        return;
-      }
-
-      const data = await orderRes.json();
-      console.log("Order Response:", data);
-
-      if (!data.order || !data.key) {
-        Alert.alert("Error", "Invalid order response.");
-        return;
-      }
-
-      navigation.navigate("RazorpayWeb", {
-        orderId: data.order.id,
-        amount: data.order.amount.toString(),
-        key: data.key,
+ const createAppointment = async () => {
+  try {
+    const res = await fetch(`${API_URL}appointments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: user.id,
         userName,
         contactNumber,
         surveyType,
@@ -67,13 +41,32 @@ export default function WalletScreen({ route, navigation }) {
         time,
         location,
         notes,
-        apiBaseUrl: API_URL.replace(/\/$/, ""),
-      });
-    } catch (error) {
-      console.error("startRazorpayPayment:", error);
-      Alert.alert("Error", "Payment initialization failed.");
-    }
-  };
+        status: "Scheduled",
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message || "Failed to book appointment");
+
+    // Update user context so it appears in ProfileScreen immediately
+    setUser((prev) => ({
+      ...prev,
+      appointments: [...(prev.appointments || []), {
+        id: data.id,
+        survey: surveyType,
+        time: `${date} ${time}`,
+      }],
+    }));
+
+    alert("Appointment booked successfully!");
+    navigation.navigate("Profile");
+  } catch (err) {
+    console.error(err);
+    alert("Failed to book appointment.");
+  }
+};
+
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -137,7 +130,7 @@ export default function WalletScreen({ route, navigation }) {
 
       {/* 🔵 Sticky Bottom Payment Button */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.payButton} onPress={startRazorpayPayment}>
+        <TouchableOpacity style={styles.payButton} onPress={createAppointment}>
           <Text style={styles.payText}>Pay ₹{amount}</Text>
         </TouchableOpacity>
       </View>

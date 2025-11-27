@@ -1,23 +1,32 @@
-// src/screens/Admin/SurveyRequestsScreen.js
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, ActivityIndicator, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const API_URL = "http://192.168.1.9:5000/api/"; // your backend URL
 
 export default function SurveyRequestsScreen() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Replace with your API call
-    const dummyData = [
-      { id: "1", name: "Ravi Kumar", location: "Chennai", date: "2025-01-15" },
-      { id: "2", name: "Priya Sharma", location: "Coimbatore", date: "2025-01-16" },
-    ];
+    const fetchRequests = async () => {
+      try {
+        const res = await fetch(`${API_URL}surveys`);
+        if (!res.ok) {
+          const text = await res.text();
+          console.log("Server error:", text);
+          throw new Error("Failed to fetch survey requests");
+        }
+        const data = await res.json();
+        setRequests(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setTimeout(() => {
-      setRequests(dummyData);
-      setLoading(false);
-    }, 800);
+    fetchRequests();
   }, []);
 
   if (loading) return <ActivityIndicator size="large" style={{ marginTop: 50 }} />;
@@ -32,8 +41,11 @@ export default function SurveyRequestsScreen() {
         renderItem={({ item }) => (
           <View style={styles.card}>
             <Text style={styles.name}>{item.name}</Text>
+            <Text>Survey Type: {item.surveyType}</Text>
             <Text>Location: {item.location}</Text>
-            <Text>Date: {item.date}</Text>
+            <Text>Date: {item.surveyDate}</Text>
+            <Text>Contact: {item.contact}</Text>
+            <Text>Status: {item.status || "Pending"}</Text>
           </View>
         )}
       />

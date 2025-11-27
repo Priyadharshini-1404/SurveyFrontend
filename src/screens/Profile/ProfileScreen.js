@@ -45,11 +45,8 @@ export default function ProfileScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        
         {/* ---------------- PROFILE HEADER ---------------- */}
         <View style={styles.header}>
-
-          {/* Profile Image with camera icon */}
           <View style={styles.imageWrapper}>
             <Image
               source={
@@ -59,8 +56,6 @@ export default function ProfileScreen({ navigation }) {
               }
               style={styles.profileImage}
             />
-
-            {/* Camera Edit Icon */}
             <TouchableOpacity style={styles.cameraIcon} onPress={pickImage}>
               <Ionicons name="camera" size={20} color="#fff" />
             </TouchableOpacity>
@@ -69,11 +64,10 @@ export default function ProfileScreen({ navigation }) {
           <Text style={styles.userName}>
             {user?.name ? `${user.name}` : "User"}
           </Text>
-
           <Text style={styles.userEmail}>{user?.email}</Text>
         </View>
 
-        {/* ---------------- EXTRA DETAILS SECTION ---------------- */}
+        {/* ---------------- EXTRA DETAILS ---------------- */}
         <View style={styles.detailCard}>
           <View style={styles.detailRow}>
             <Ionicons name="call-outline" size={20} color="#0a74da" />
@@ -102,7 +96,65 @@ export default function ProfileScreen({ navigation }) {
           </Text>
         </View>
 
-        {/* ---------------- SETTINGS SECTION ---------------- */}
+        {/* ---------------- MY SURVEYS ---------------- */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>My Surveys</Text>
+          {user?.surveys && user.surveys.length > 0 ? (
+            user.surveys.map((survey) => (
+              <TouchableOpacity
+                key={survey.id}
+                style={styles.detailRow}
+                onPress={() =>
+                  navigation.navigate("SurveyDetail", { surveyId: survey.id })
+                }
+              >
+                <Ionicons name="document-text-outline" size={20} color="#0a74da" />
+                <Text style={styles.detailText}>{survey.title}</Text>
+                <Text
+                  style={[
+                    styles.detailText,
+                    { marginLeft: "auto", fontSize: 14, color: "#555" },
+                  ]}
+                >
+                  {survey.date}
+                </Text>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <Text style={styles.text}>You have no surveys booked.</Text>
+          )}
+        </View>
+
+        {/* ---------------- MY APPOINTMENTS ---------------- */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>My Appointments</Text>
+          {user?.appointments && user.appointments.length > 0 ? (
+            user.appointments.map((appointment) => (
+              <TouchableOpacity
+                key={appointment.id}
+                style={styles.detailRow}
+                onPress={() =>
+                  navigation.navigate("AppointmentDetail", { appointmentId: appointment.id })
+                }
+              >
+                <Ionicons name="calendar-outline" size={20} color="#0a74da" />
+                <Text style={styles.detailText}>{appointment.survey}</Text>
+                <Text
+                  style={[
+                    styles.detailText,
+                    { marginLeft: "auto", fontSize: 14, color: "#555" },
+                  ]}
+                >
+                  {appointment.time}
+                </Text>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <Text style={styles.text}>You have no upcoming appointments.</Text>
+          )}
+        </View>
+
+        {/* ---------------- SETTINGS ---------------- */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Settings</Text>
 
@@ -117,16 +169,12 @@ export default function ProfileScreen({ navigation }) {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.row}>
-            <Ionicons
-              name="notifications-outline"
-              size={22}
-              color="#0a74da"
-            />
+            <Ionicons name="notifications-outline" size={22} color="#0a74da" />
             <Text style={styles.rowText}>Notification Settings</Text>
           </TouchableOpacity>
         </View>
 
-        {/* ---------------- SUPPORT SECTION ---------------- */}
+        {/* ---------------- SUPPORT ---------------- */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Help & Support</Text>
 
@@ -149,7 +197,6 @@ export default function ProfileScreen({ navigation }) {
           <Ionicons name="log-out-outline" size={22} color="#fff" />
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
-
       </ScrollView>
     </SafeAreaView>
   );

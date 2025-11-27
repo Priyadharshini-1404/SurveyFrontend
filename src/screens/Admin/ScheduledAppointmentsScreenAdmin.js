@@ -2,22 +2,27 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, ActivityIndicator, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+const API_URL = "http://192.168.1.9:5000/api/"; // your backend URL
 
 export default function ScheduledAppointmentsScreen() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const dummyData = [
-      { id: "1", user: "Arun", surveyDate: "2025-01-20", status: "Scheduled" },
-      { id: "2", user: "Divya", surveyDate: "2025-01-22", status: "Pending" },
-    ];
-
-    setTimeout(() => {
-      setAppointments(dummyData);
+useEffect(() => {
+  const fetchAppointments = async () => {
+    try {
+      const res = await fetch(`${API_URL}appointments`);
+      const data = await res.json();
+      setAppointments(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
       setLoading(false);
-    }, 800);
-  }, []);
+    }
+  };
+
+  fetchAppointments();
+}, []);
 
   if (loading) return <ActivityIndicator size="large" style={{ marginTop: 50 }} />;
 
@@ -25,17 +30,20 @@ export default function ScheduledAppointmentsScreen() {
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Scheduled Appointments</Text>
 
-      <FlatList
-        data={appointments}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.name}>{item.user}</Text>
-            <Text>Date: {item.surveyDate}</Text>
-            <Text>Status: {item.status}</Text>
-          </View>
-        )}
-      />
+     <FlatList
+  data={appointments}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => (
+    <View style={styles.card}>
+      <Text style={styles.name}>{item.userName}</Text>
+      <Text>Survey: {item.surveyType}</Text>
+      <Text>Date & Time: {item.date} {item.time}</Text>
+      <Text>Staff: {item.selectedStaff}</Text>
+      <Text>Status: {item.status}</Text>
+    </View>
+  )}
+/>
+
     </SafeAreaView>
   );
 }
