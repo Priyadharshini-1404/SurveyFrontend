@@ -16,7 +16,7 @@ import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/nativ
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../hooks/useAuth";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const API_URL = "http://192.168.1.10:5000/api";
 
 export default function RequestSurvey() {
   const navigation = useNavigation();
@@ -39,6 +39,12 @@ export default function RequestSurvey() {
     "Building Settings out and Grid Line marking",
     "Layout design and Stone Fixing", "Layout Survey",
   ];
+  useEffect(() => {
+  if (user?.name) {
+    setName(user.name);
+  }
+}, [user]);
+
 
   useFocusEffect(
     useCallback(() => {
@@ -66,7 +72,14 @@ export default function RequestSurvey() {
       const res = await fetch(`${API_URL}/surveys`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, surveyType, location, contact, surveyDate }),
+body: JSON.stringify({
+  name,
+  surveyType,
+  location,
+  contact,
+  surveyDate,
+  userId: user?.id,   // ⬅ Add this
+}),
       });
 
       const data = await res.json();
@@ -78,7 +91,8 @@ export default function RequestSurvey() {
 
       Alert.alert("Success", "Survey request submitted!", [
         { text: "OK", onPress: () => navigation.navigate("HomeScreen") },
-      ]);
+      ]);sendSurveyRequestNotification(user.id);
+
     } catch (err) {
       Alert.alert("Network", "Server not reachable.");
     }
@@ -96,12 +110,14 @@ export default function RequestSurvey() {
 
           {/* Name */}
           <Text style={styles.label}>Your Name</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your full name"
-            value={name}
-            onChangeText={setName}
-          />
+         <TextInput
+  style={styles.input}
+  placeholder="Enter your full name"
+  value={name}
+  onChangeText={setName}
+  editable={true} // <-- makes it read-only
+/>
+
 
           {/* Survey Type */}
           <Text style={styles.label}>Survey Type</Text>

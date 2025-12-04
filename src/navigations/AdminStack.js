@@ -7,6 +7,7 @@ import SurveyRequests from "../screens/Admin/SurveyRequestsScreenAdmin";
 import ScheduledAppointments from "../screens/Admin/ScheduledAppointmentsScreenAdmin";
 import PaymentTransactions from "../screens/Admin/PaymentTransactionsScreenAdmin";
 import SurveyTracking from "../screens/Admin/SurveyTrackingScreenAdmin";
+import NotificationsScreen from "../screens/Home/NotificationScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +19,8 @@ export default function AdminStack() {
       <Stack.Screen name="ScheduledAppointments" component={ScheduledAppointments} />
       <Stack.Screen name="PaymentTransactions" component={PaymentTransactions} />
       <Stack.Screen name="SurveyTracking" component={SurveyTracking} />
+      <Stack.Screen name ="Notification" component={NotificationsScreen}/>
+      
     </Stack.Navigator>
   );
 }

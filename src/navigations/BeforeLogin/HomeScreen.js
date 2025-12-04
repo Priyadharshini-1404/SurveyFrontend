@@ -155,7 +155,7 @@ export default function HomeScreen({ navigation }) {
                     <Animatable.View animation="bounce" iterationCount={1} duration={800}>
                       <Ionicons name="calendar-outline" size={38} color="#fff" />
                     </Animatable.View>
-                    <Text style={styles.gradientButtonText}>Appointments</Text>
+                    <Text style={styles.gradientButtonText}> Book Appointments</Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </Animatable.View>

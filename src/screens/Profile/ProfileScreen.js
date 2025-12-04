@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
 import {
   View,
   Text,
@@ -11,10 +11,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../hooks/useAuth";
 import * as ImagePicker from "expo-image-picker";
+const API_URL = "http://192.168.1.10:5000/api/surveys";
 
 export default function ProfileScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const [localImage, setLocalImage] = useState(user?.profilePic || null);
+const [surveyList, setSurveyList] = useState([]);
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -41,6 +43,25 @@ export default function ProfileScreen({ navigation }) {
   const handleLogout = () => {
     navigation.navigate("Login");
   };
+useEffect(() => {
+  if (user?.id) loadUserSurveys();
+  const handler = (payload) => {
+    // if event is about this user's survey, refresh list
+    if (payload?.type === "survey-status" || payload?.type === "survey-request") {
+      loadUserSurveys();
+    }
+  };
+  socket.on("receiveNotification", handler);
+  return () => socket.off("receiveNotification", handler);
+}, [user]);
+
+const loadUserSurveys = async () => {
+  try {
+    const res = await fetch(`http://192.168.1.10:5000/api/surveys/user/${user.id}`);
+    const data = await res.json();
+    setSurveyList(data);
+  } catch (err) { console.log(err); }
+};
 
   return (
     <SafeAreaView style={styles.container}>
@@ -98,32 +119,29 @@ export default function ProfileScreen({ navigation }) {
 
         {/* ---------------- MY SURVEYS ---------------- */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>My Surveys</Text>
-          {user?.surveys && user.surveys.length > 0 ? (
-            user.surveys.map((survey) => (
-              <TouchableOpacity
-                key={survey.id}
-                style={styles.detailRow}
-                onPress={() =>
-                  navigation.navigate("SurveyDetail", { surveyId: survey.id })
-                }
-              >
-                <Ionicons name="document-text-outline" size={20} color="#0a74da" />
-                <Text style={styles.detailText}>{survey.title}</Text>
-                <Text
-                  style={[
-                    styles.detailText,
-                    { marginLeft: "auto", fontSize: 14, color: "#555" },
-                  ]}
-                >
-                  {survey.date}
-                </Text>
-              </TouchableOpacity>
-            ))
-          ) : (
-            <Text style={styles.text}>You have no surveys booked.</Text>
-          )}
+  <Text style={styles.sectionTitle}>My Surveys</Text>
+  {surveyList.length ? (
+    surveyList.map((s) => (
+      <Animatable.View animation="fadeInUp" key={s.Id} style={styles.detailRow}>
+        <Ionicons name="document-text-outline" size={20} color="#0a74da" />
+        <View style={{ marginLeft: 10, flex: 1 }}>
+          <Text style={styles.detailText}>{s.SurveyType}</Text>
+          <Text style={{ fontSize: 12, color: "#666" }}>{new Date(s.SurveyDate).toDateString()}</Text>
         </View>
+        <View style={{ alignItems: "flex-end" }}>
+          <Text style={{ fontWeight: "700" }}>{s.Status || "Pending"}</Text>
+          <View style={{ height: 6 }} />
+          <StatusBadge status={s.Status} />
+        </View>
+      </Animatable.View>
+    ))
+  ) : (
+    <Text style={styles.text}>You have no surveys booked.</Text>
+  )}
+</View>
+
+
+
 
         {/* ---------------- MY APPOINTMENTS ---------------- */}
         <View style={styles.section}>

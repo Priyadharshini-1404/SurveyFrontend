@@ -1,39 +1,44 @@
 import axios from "axios";
-import { socket } from "./socket"; // ✅ make sure the path is correct
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL;  
 
-const API_URL =  `${BASE_URL}/notifications`; // same IP as socket.js
+// ⚠️ Replace with your local IP if using Expo on device
+const BASE_URL = "http://192.168.1.10:5000/api";
 
-// Save to DB
-export const sendNotificationToDB = async (senderId, receiverId, message, type) => {
+export const sendSurveyRequestNotification = async (userId) => {
   try {
-    await axios.post(`${API_URL}/api/notifications`, {
-      senderId,
-      receiverId,
-      message,
-      type,
+    await axios.post(`${BASE_URL}/notifications/survey-request`, {
+      userId,
+      message: "New survey request submitted",
+      type: "survey-request",
     });
   } catch (err) {
-    console.log("Failed to save notification:", err);
-  }
-};
-export const getAllAdmins = async () => {
-  try {
-    const res = await axios.get(`${API_URL}/api/auth/admins`);
-    return res.data; // [{id:1}, {id:2}, {id:3}]
-  } catch (err) {
-    console.log("Error fetching admins:", err);
-    return [];
+    console.log("Error notifying admins:", err.response?.data || err.message);
   }
 };
 
-// ✅ Fetch notifications for a specific user
-export const fetchNotifications = async (receiverId) => {
+export const sendSurveyResponseNotification = async (adminId, userId, action) => {
+  const message =
+    action === "accept"
+      ? "Your survey request has been ACCEPTED"
+      : "Your survey request has been REJECTED";
+
   try {
-    const response = await axios.get(`${API_URL}/${receiverId}`);
-    return response.data;
-  } catch (error) {
-    console.error("❌ Error fetching notifications:", error);
+    await axios.post(`${BASE_URL}/notifications/survey-response`, {
+      adminId,
+      userId,
+      message,
+      type: "survey-status",
+    });
+  } catch (err) {
+    console.log("Error notifying user:", err.response?.data || err.message);
+  }
+};
+
+export const fetchNotifications = async (userId) => {
+  try {
+    const res = await axios.get(`${BASE_URL}/notifications/${userId}`);
+    return res.data;
+  } catch (err) {
+    console.log("Error fetching notifications:", err.response?.data || err.message);
     return [];
   }
 };

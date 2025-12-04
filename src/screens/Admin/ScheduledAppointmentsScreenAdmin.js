@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, ActivityIndicator, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-const API_URL = "http://192.168.1.9:5000/api/"; // your backend URL
+const API_URL = "http://192.168.1.10:5000/api/"; // your backend URL
 
 export default function ScheduledAppointmentsScreen() {
   const [appointments, setAppointments] = useState([]);

@@ -1,35 +1,70 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, ActivityIndicator, StyleSheet } from "react-native";
+import { View, Text, FlatList, Button, Alert, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../../hooks/useAuth";
+import { sendSurveyResponseNotification } from "../../services/notificationService";
 
-const API_URL = "http://192.168.1.9:5000/api/"; // your backend URL
+const API_URL = "http://192.168.1.10:5000/api/surveys";
 
 export default function SurveyRequestsScreen() {
   const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const res = await fetch(`${API_URL}surveys`);
-        if (!res.ok) {
-          const text = await res.text();
-          console.log("Server error:", text);
-          throw new Error("Failed to fetch survey requests");
-        }
+        const res = await fetch(API_URL);
         const data = await res.json();
+
+        console.log("Survey Requests Response:", data); // 👈 debug
+
         setRequests(data);
       } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+        console.log("Error fetching:", err);
       }
     };
-
     fetchRequests();
   }, []);
 
-  if (loading) return <ActivityIndicator size="large" style={{ marginTop: 50 }} />;
+const handleAction = async (surveyId, userId, action) => {
+  if (!surveyId) {
+    Alert.alert("Error", "Survey ID missing");
+    return;
+  }
+
+  if (!userId) {
+    Alert.alert("Error", "User ID missing. The survey request was submitted without a UserId.");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/respond`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        surveyId,
+        userId,
+        status: action === "accept" ? "Approved" : "Rejected",
+      }),
+    });
+
+    const result = await res.json();
+    console.log("Respond survey result:", result);
+
+    if (!res.ok) {
+      Alert.alert("Error", result.message || "Failed to update survey");
+      return;
+    }
+
+    Alert.alert("Success", `Survey ${action}ed successfully`);
+  } catch (error) {
+    console.log("Error responding:", error);
+    Alert.alert("Error", "Something went wrong");
+  }
+};
+
+
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -37,31 +72,48 @@ export default function SurveyRequestsScreen() {
 
       <FlatList
         data={requests}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.name}>{item.name}</Text>
-            <Text>Survey Type: {item.surveyType}</Text>
-            <Text>Location: {item.location}</Text>
-            <Text>Date: {item.surveyDate}</Text>
-            <Text>Contact: {item.contact}</Text>
-            <Text>Status: {item.status || "Pending"}</Text>
-          </View>
-        )}
+keyExtractor={(item) => item.Id.toString()}
+        renderItem={({ item }) => {
+const id = item.Id;
+
+          return (
+            <View style={styles.card}>
+              <Text>User: {item.Name}</Text>
+              <Text>Survey: {item.SurveyType}</Text>
+              <Text>Date: {item.SurveyDate}</Text>
+
+              <View style={{ flexDirection: "row", marginTop: 10 }}>
+              <Button
+  title="Accept"
+  color="green"
+  onPress={() => handleAction(item.Id, item.UserId, "accept")}
+/>
+
+<View style={{ width: 10 }} />
+
+<Button
+  title="Reject"
+  color="red"
+  onPress={() => handleAction(item.Id, item.UserId, "reject")}
+/>
+
+              </View>
+            </View>
+          );
+        }}
       />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20 },
+  container: { flex: 1, padding: 20 },
   title: { fontSize: 22, fontWeight: "bold", marginBottom: 15 },
   card: {
     padding: 15,
-    backgroundColor: "#fff",
     marginBottom: 10,
+    backgroundColor: "#fff",
     borderRadius: 10,
     elevation: 3,
   },
-  name: { fontSize: 18, fontWeight: "bold" },
 });
