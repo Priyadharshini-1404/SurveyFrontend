@@ -11,12 +11,28 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../hooks/useAuth";
 import * as ImagePicker from "expo-image-picker";
+import { socket } from "../../services/socket";
+import { LineChart } from "react-native-chart-kit";
+import { Dimensions } from "react-native";
+
 const API_URL = "http://192.168.1.10:5000/api/surveys";
 
 export default function ProfileScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const [localImage, setLocalImage] = useState(user?.profilePic || null);
 const [surveyList, setSurveyList] = useState([]);
+const getStatusPercent = (status) => {
+  switch (status) {
+    case "Pending":
+      return 0;
+    case "Outgoing":
+      return 50;
+    case "Completed":
+      return 100;
+    default:
+      return 0;
+  }
+};
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -118,59 +134,84 @@ const loadUserSurveys = async () => {
         </View>
 
         {/* ---------------- MY SURVEYS ---------------- */}
-        <View style={styles.section}>
-  <Text style={styles.sectionTitle}>My Surveys</Text>
-  {surveyList.length ? (
-    surveyList.map((s) => (
-      <Animatable.View animation="fadeInUp" key={s.Id} style={styles.detailRow}>
+{user?.role !== "Admin" && (
+  <View style={styles.section}>
+    <Text style={styles.sectionTitle}>My Surveys</Text>
+
+ {surveyList.length ? (
+  surveyList.map((s) => (
+    <View key={s.Id} style={{ marginBottom: 20 }}>
+      <View style={styles.detailRow}>
         <Ionicons name="document-text-outline" size={20} color="#0a74da" />
         <View style={{ marginLeft: 10, flex: 1 }}>
           <Text style={styles.detailText}>{s.SurveyType}</Text>
-          <Text style={{ fontSize: 12, color: "#666" }}>{new Date(s.SurveyDate).toDateString()}</Text>
+          <Text style={{ fontSize: 12, color: "#666" }}>
+            {new Date(s.SurveyDate).toDateString()}
+          </Text>
         </View>
         <View style={{ alignItems: "flex-end" }}>
           <Text style={{ fontWeight: "700" }}>{s.Status || "Pending"}</Text>
-          <View style={{ height: 6 }} />
-          <StatusBadge status={s.Status} />
         </View>
-      </Animatable.View>
-    ))
-  ) : (
-    <Text style={styles.text}>You have no surveys booked.</Text>
-  )}
-</View>
+      </View>
+
+      {/* -------- COMPLETION PROGRESS BAR -------- */}
+      <View style={styles.progressBarBackground}>
+        <View
+          style={[
+            styles.progressBarFill,
+            { width: `${getStatusPercent(s.Status)}%` },
+          ]}
+        />
+      </View>
+      <Text style={{ fontSize: 12, color: "#555", marginTop: 2 }}>
+        {getStatusPercent(s.Status)}% Complete
+      </Text>
+    </View>
+  ))
+) : (
+  <Text style={styles.text}>You have no surveys booked.</Text>
+)}
+
+  </View>
+)}
 
 
 
 
-        {/* ---------------- MY APPOINTMENTS ---------------- */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>My Appointments</Text>
-          {user?.appointments && user.appointments.length > 0 ? (
-            user.appointments.map((appointment) => (
-              <TouchableOpacity
-                key={appointment.id}
-                style={styles.detailRow}
-                onPress={() =>
-                  navigation.navigate("AppointmentDetail", { appointmentId: appointment.id })
-                }
-              >
-                <Ionicons name="calendar-outline" size={20} color="#0a74da" />
-                <Text style={styles.detailText}>{appointment.survey}</Text>
-                <Text
-                  style={[
-                    styles.detailText,
-                    { marginLeft: "auto", fontSize: 14, color: "#555" },
-                  ]}
-                >
-                  {appointment.time}
-                </Text>
-              </TouchableOpacity>
-            ))
-          ) : (
-            <Text style={styles.text}>You have no upcoming appointments.</Text>
-          )}
-        </View>
+       {/* ---------------- MY APPOINTMENTS ---------------- */}
+{user?.role !== "Admin" && (
+  <View style={styles.section}>
+    <Text style={styles.sectionTitle}>My Appointments</Text>
+
+    {user?.appointments && user.appointments.length > 0 ? (
+      user.appointments.map((appointment) => (
+        <TouchableOpacity
+          key={appointment.id}
+          style={styles.detailRow}
+          onPress={() =>
+            navigation.navigate("AppointmentDetail", {
+              appointmentId: appointment.id,
+            })
+          }
+        >
+          <Ionicons name="calendar-outline" size={20} color="#0a74da" />
+          <Text style={styles.detailText}>{appointment.survey}</Text>
+          <Text
+            style={[
+              styles.detailText,
+              { marginLeft: "auto", fontSize: 14, color: "#555" },
+            ]}
+          >
+            {appointment.time}
+          </Text>
+        </TouchableOpacity>
+      ))
+    ) : (
+      <Text style={styles.text}>You have no upcoming appointments.</Text>
+    )}
+  </View>
+)}
+
 
         {/* ---------------- SETTINGS ---------------- */}
         <View style={styles.section}>
@@ -254,6 +295,19 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderRadius: 10,
   },
+  progressBarBackground: {
+  height: 10,
+  backgroundColor: "#ddd",
+  borderRadius: 5,
+  overflow: "hidden",
+  marginTop: 8,
+},
+progressBarFill: {
+  height: "100%",
+  backgroundColor: "#0a74da",
+  borderRadius: 5,
+},
+
   detailRow: {
     flexDirection: "row",
     alignItems: "center",
