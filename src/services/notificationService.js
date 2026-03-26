@@ -1,11 +1,10 @@
-import axios from "axios";
+import baseApi from "../api/api";
 
 // ⚠️ Replace with your local IP if using Expo on device
-const BASE_URL = "http://192.168.1.10:5000/api";
 
 export const sendSurveyRequestNotification = async (userId) => {
   try {
-    await axios.post(`${BASE_URL}/notifications/survey-request`, {
+    await baseApi.post(`/notifications/survey-request`, {
       userId,
       message: "New survey request submitted",
       type: "survey-request",
@@ -22,7 +21,7 @@ export const sendSurveyResponseNotification = async (adminId, userId, action) =>
       : "Your survey request has been REJECTED";
 
   try {
-    await axios.post(`${BASE_URL}/notifications/survey-response`, {
+    await baseApi.post(`/notifications/survey-response`, {
       adminId,
       userId,
       message,
@@ -35,7 +34,7 @@ export const sendSurveyResponseNotification = async (adminId, userId, action) =>
 
 export const fetchNotifications = async (userId) => {
   try {
-    const res = await axios.get(`${BASE_URL}/notifications/${userId}`);
+    const res = await baseApi.get(`/notifications/${userId}`);
     return res.data;
   } catch (err) {
     console.log("Error fetching notifications:", err.response?.data || err.message);

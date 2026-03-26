@@ -1,21 +1,20 @@
+import baseApi from "../api/api";
 
 // src/services/authService.js
-const API_URL = 'http://192.168.1.10:5000/api/auth'; // PC's LAN IP
 
 export const loginUser = async (email, password) => {
-  const res = await fetch(`${API_URL}/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+  const res = await baseApi.post(`/auth/login`, {
+    email,
+    password,
   });
-  return res.json();
+  return res;
 };
 
 export const registerUser = async ({ name, email, password }) => {
-  const res = await fetch(`${API_URL}/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, password }),
+  const res = await baseApi.post(`/auth/register`, {
+    name,
+    email,
+    password,
   });
-  return res.json();
+  return res;
 };

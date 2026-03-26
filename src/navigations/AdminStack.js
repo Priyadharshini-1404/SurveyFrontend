@@ -19,8 +19,8 @@ export default function AdminStack() {
       <Stack.Screen name="ScheduledAppointments" component={ScheduledAppointments} />
       <Stack.Screen name="PaymentTransactions" component={PaymentTransactions} />
       <Stack.Screen name="SurveyTracking" component={SurveyTracking} />
-      <Stack.Screen name ="Notification" component={NotificationsScreen}/>
-      
+      <Stack.Screen name="Notification" component={NotificationsScreen} />
+
     </Stack.Navigator>
   );
 }

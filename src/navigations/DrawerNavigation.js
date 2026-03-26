@@ -68,8 +68,8 @@ export default function DrawerNavigator() {
           drawerIcon: ({ color, size }) => <Ionicons name="lock-closed-outline" size={size} color={color} />,
         }}
       />
-     
-      
+
+
     </Drawer.Navigator>
   );
 }

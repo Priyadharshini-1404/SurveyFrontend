@@ -27,11 +27,11 @@ export default function AppTabs() {
           let icon;
           if (route.name === "Home") icon = "home-outline";
           if (route.name === "Profile") icon = "person-outline";
-           if (route.name === "SurveyRequests") icon = "document-text-outline";
-  if (route.name === "ScheduledAppointments") icon = "calendar-outline";
-  if (route.name === "PaymentTransactions") icon = "wallet-outline";
-  if (route.name === "SurveyTracking") icon = "analytics-outline";
-          
+          if (route.name === "SurveyRequests") icon = "document-text-outline";
+          if (route.name === "ScheduledAppointments") icon = "calendar-outline";
+          if (route.name === "PaymentTransactions") icon = "wallet-outline";
+          if (route.name === "SurveyTracking") icon = "analytics-outline";
+
           return <Ionicons name={icon} size={22} color={color} />;
         },
       })}

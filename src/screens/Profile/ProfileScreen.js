@@ -1,4 +1,4 @@
-import React, { useState , useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -15,24 +15,23 @@ import { socket } from "../../services/socket";
 import { LineChart } from "react-native-chart-kit";
 import { Dimensions } from "react-native";
 
-const API_URL = "http://192.168.1.10:5000/api/surveys";
 
 export default function ProfileScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const [localImage, setLocalImage] = useState(user?.profilePic || null);
-const [surveyList, setSurveyList] = useState([]);
-const getStatusPercent = (status) => {
-  switch (status) {
-    case "Pending":
-      return 0;
-    case "Outgoing":
-      return 50;
-    case "Completed":
-      return 100;
-    default:
-      return 0;
-  }
-};
+  const [surveyList, setSurveyList] = useState([]);
+  const getStatusPercent = (status) => {
+    switch (status) {
+      case "Pending":
+        return 0;
+      case "Outgoing":
+        return 50;
+      case "Completed":
+        return 100;
+      default:
+        return 0;
+    }
+  };
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -59,25 +58,25 @@ const getStatusPercent = (status) => {
   const handleLogout = () => {
     navigation.navigate("Login");
   };
-useEffect(() => {
-  if (user?.id) loadUserSurveys();
-  const handler = (payload) => {
-    // if event is about this user's survey, refresh list
-    if (payload?.type === "survey-status" || payload?.type === "survey-request") {
-      loadUserSurveys();
-    }
-  };
-  socket.on("receiveNotification", handler);
-  return () => socket.off("receiveNotification", handler);
-}, [user]);
+  useEffect(() => {
+    if (user?.id) loadUserSurveys();
+    const handler = (payload) => {
+      // if event is about this user's survey, refresh list
+      if (payload?.type === "survey-status" || payload?.type === "survey-request") {
+        loadUserSurveys();
+      }
+    };
+    socket.on("receiveNotification", handler);
+    return () => socket.off("receiveNotification", handler);
+  }, [user]);
 
-const loadUserSurveys = async () => {
-  try {
-    const res = await fetch(`http://192.168.1.10:5000/api/surveys/user/${user.id}`);
-    const data = await res.json();
-    setSurveyList(data);
-  } catch (err) { console.log(err); }
-};
+  const loadUserSurveys = async () => {
+    try {
+      const res = await baseApi.get(`/surveys/user/${user.id}`);
+      const data = res;
+      setSurveyList(data);
+    } catch (err) { console.log(err); }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -134,83 +133,83 @@ const loadUserSurveys = async () => {
         </View>
 
         {/* ---------------- MY SURVEYS ---------------- */}
-{user?.role !== "Admin" && (
-  <View style={styles.section}>
-    <Text style={styles.sectionTitle}>My Surveys</Text>
+        {user?.role !== "Admin" && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>My Surveys</Text>
 
- {surveyList.length ? (
-  surveyList.map((s) => (
-    <View key={s.Id} style={{ marginBottom: 20 }}>
-      <View style={styles.detailRow}>
-        <Ionicons name="document-text-outline" size={20} color="#0a74da" />
-        <View style={{ marginLeft: 10, flex: 1 }}>
-          <Text style={styles.detailText}>{s.SurveyType}</Text>
-          <Text style={{ fontSize: 12, color: "#666" }}>
-            {new Date(s.SurveyDate).toDateString()}
-          </Text>
-        </View>
-        <View style={{ alignItems: "flex-end" }}>
-          <Text style={{ fontWeight: "700" }}>{s.Status || "Pending"}</Text>
-        </View>
-      </View>
+            {surveyList.length ? (
+              surveyList.map((s) => (
+                <View key={s.Id} style={{ marginBottom: 20 }}>
+                  <View style={styles.detailRow}>
+                    <Ionicons name="document-text-outline" size={20} color="#0a74da" />
+                    <View style={{ marginLeft: 10, flex: 1 }}>
+                      <Text style={styles.detailText}>{s.SurveyType}</Text>
+                      <Text style={{ fontSize: 12, color: "#666" }}>
+                        {new Date(s.SurveyDate).toDateString()}
+                      </Text>
+                    </View>
+                    <View style={{ alignItems: "flex-end" }}>
+                      <Text style={{ fontWeight: "700" }}>{s.Status || "Pending"}</Text>
+                    </View>
+                  </View>
 
-      {/* -------- COMPLETION PROGRESS BAR -------- */}
-      <View style={styles.progressBarBackground}>
-        <View
-          style={[
-            styles.progressBarFill,
-            { width: `${getStatusPercent(s.Status)}%` },
-          ]}
-        />
-      </View>
-      <Text style={{ fontSize: 12, color: "#555", marginTop: 2 }}>
-        {getStatusPercent(s.Status)}% Complete
-      </Text>
-    </View>
-  ))
-) : (
-  <Text style={styles.text}>You have no surveys booked.</Text>
-)}
+                  {/* -------- COMPLETION PROGRESS BAR -------- */}
+                  <View style={styles.progressBarBackground}>
+                    <View
+                      style={[
+                        styles.progressBarFill,
+                        { width: `${getStatusPercent(s.Status)}%` },
+                      ]}
+                    />
+                  </View>
+                  <Text style={{ fontSize: 12, color: "#555", marginTop: 2 }}>
+                    {getStatusPercent(s.Status)}% Complete
+                  </Text>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.text}>You have no surveys booked.</Text>
+            )}
 
-  </View>
-)}
-
-
+          </View>
+        )}
 
 
-       {/* ---------------- MY APPOINTMENTS ---------------- */}
-{user?.role !== "Admin" && (
-  <View style={styles.section}>
-    <Text style={styles.sectionTitle}>My Appointments</Text>
 
-    {user?.appointments && user.appointments.length > 0 ? (
-      user.appointments.map((appointment) => (
-        <TouchableOpacity
-          key={appointment.id}
-          style={styles.detailRow}
-          onPress={() =>
-            navigation.navigate("AppointmentDetail", {
-              appointmentId: appointment.id,
-            })
-          }
-        >
-          <Ionicons name="calendar-outline" size={20} color="#0a74da" />
-          <Text style={styles.detailText}>{appointment.survey}</Text>
-          <Text
-            style={[
-              styles.detailText,
-              { marginLeft: "auto", fontSize: 14, color: "#555" },
-            ]}
-          >
-            {appointment.time}
-          </Text>
-        </TouchableOpacity>
-      ))
-    ) : (
-      <Text style={styles.text}>You have no upcoming appointments.</Text>
-    )}
-  </View>
-)}
+
+        {/* ---------------- MY APPOINTMENTS ---------------- */}
+        {user?.role !== "Admin" && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>My Appointments</Text>
+
+            {user?.appointments && user.appointments.length > 0 ? (
+              user.appointments.map((appointment) => (
+                <TouchableOpacity
+                  key={appointment.id}
+                  style={styles.detailRow}
+                  onPress={() =>
+                    navigation.navigate("AppointmentDetail", {
+                      appointmentId: appointment.id,
+                    })
+                  }
+                >
+                  <Ionicons name="calendar-outline" size={20} color="#0a74da" />
+                  <Text style={styles.detailText}>{appointment.survey}</Text>
+                  <Text
+                    style={[
+                      styles.detailText,
+                      { marginLeft: "auto", fontSize: 14, color: "#555" },
+                    ]}
+                  >
+                    {appointment.time}
+                  </Text>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <Text style={styles.text}>You have no upcoming appointments.</Text>
+            )}
+          </View>
+        )}
 
 
         {/* ---------------- SETTINGS ---------------- */}
@@ -296,17 +295,17 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   progressBarBackground: {
-  height: 10,
-  backgroundColor: "#ddd",
-  borderRadius: 5,
-  overflow: "hidden",
-  marginTop: 8,
-},
-progressBarFill: {
-  height: "100%",
-  backgroundColor: "#0a74da",
-  borderRadius: 5,
-},
+    height: 10,
+    backgroundColor: "#ddd",
+    borderRadius: 5,
+    overflow: "hidden",
+    marginTop: 8,
+  },
+  progressBarFill: {
+    height: "100%",
+    backgroundColor: "#0a74da",
+    borderRadius: 5,
+  },
 
   detailRow: {
     flexDirection: "row",

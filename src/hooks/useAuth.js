@@ -15,50 +15,68 @@ export const AuthProvider = ({ children }) => {
   const refreshIntervalRef = useRef(null);
 
   useEffect(() => {
-    // Attempt auto-login from stored tokens
     (async () => {
       try {
-        const accessToken = await AsyncStorage.getItem("accessToken");
-        if (!accessToken) {
+        const refreshToken = await AsyncStorage.getItem("refreshToken");
+
+        // No refresh token = truly logged out
+        if (!refreshToken) {
           setLoading(false);
           return;
         }
-        // call /me
-        const res = await fetch(`${BASE_URL}/me`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
 
-        if (res.ok) {
-          const profile = await res.json();
-          setUser(profile);
-          startAutoRefresh();
-        } else {
-          // try refresh once
-          const refreshed = await tryRefresh();
-          if (refreshed) {
-            const newToken = await AsyncStorage.getItem("accessToken");
-            const retry = await fetch(`${BASE_URL}/me`, {
-              headers: { Authorization: `Bearer ${newToken}` },
-            });
-            if (retry.ok) {
-              const profile = await retry.json();
-              setUser(profile);
-              startAutoRefresh();
-            } else {
-              await clearAll();
-            }
+        const accessToken = await AsyncStorage.getItem("accessToken");
+
+        if (accessToken) {
+          // Try /me with existing access token
+          const res = await fetch(`${BASE_URL}/me`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          });
+
+          if (res.ok) {
+            const profile = await res.json();
+            setUser(profile);
+            startAutoRefresh();
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Access token missing or expired — try refresh
+        const refreshed = await tryRefresh();
+
+        if (refreshed) {
+          const newToken = await AsyncStorage.getItem("accessToken");
+          const retry = await fetch(`${BASE_URL}/me`, {
+            headers: { Authorization: `Bearer ${newToken}` },
+          });
+
+          if (retry.ok) {
+            const profile = await retry.json();
+            setUser(profile);
+            startAutoRefresh();
           } else {
             await clearAll();
           }
+        } else {
+          // Refresh failed — but don't clear, just send to login
+          // Only clear if refresh token is truly invalid
+          await clearAll();
         }
+
       } catch (err) {
         console.log("Auto-login error:", err);
-        await clearAll();
+        // Network error — don't clear tokens, user might be offline
+        const refreshToken = await AsyncStorage.getItem("refreshToken");
+        if (refreshToken) {
+          // Keep user logged in state, just couldn't verify
+          const storedUser = await AsyncStorage.getItem("user");
+          if (storedUser) setUser(JSON.parse(storedUser));
+        }
       } finally {
         setLoading(false);
       }
     })();
-    // cleanup on unmount
     return () => stopAutoRefresh();
   }, []);
 
@@ -80,6 +98,7 @@ export const AuthProvider = ({ children }) => {
   const clearAll = async () => {
     await AsyncStorage.removeItem("accessToken");
     await AsyncStorage.removeItem("refreshToken");
+    await AsyncStorage.removeItem("user");
     setUser(null);
     stopAutoRefresh();
   };
@@ -116,6 +135,7 @@ export const AuthProvider = ({ children }) => {
 
   // LOGIN: store access + refresh tokens and set profile
   const login = async (email, password) => {
+    console.log(email, password, BASE_URL)
     const res = await fetch(`${BASE_URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -123,26 +143,21 @@ export const AuthProvider = ({ children }) => {
     });
 
     const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Login failed");
-    }
+    if (!res.ok) throw new Error(data.message || "Login failed");
 
-    // backend returns accessToken, refreshToken, user
     const { accessToken, refreshToken, user: profile } = data;
-    if (!accessToken || !refreshToken) {
-      throw new Error("Invalid tokens from server");
-    }
+    if (!accessToken || !refreshToken) throw new Error("Invalid tokens from server");
 
-    await AsyncStorage.setItem("accessToken", accessToken);
-    await AsyncStorage.setItem("refreshToken", refreshToken);
-
-    // profile might be returned as data.user (object)
-    const profileObj = profile || data.user || {
+    const profileObj = profile || {
       id: data.id,
       name: data.name,
       email: data.email,
       role: data.role,
     };
+
+    await AsyncStorage.setItem("accessToken", accessToken);
+    await AsyncStorage.setItem("refreshToken", refreshToken);
+    await AsyncStorage.setItem("user", JSON.stringify(profileObj)); // ← save user
 
     setUser(profileObj);
     startAutoRefresh();
@@ -150,17 +165,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async ({ name, email, password, role = "user" }) => {
-  const res = await fetch(`${BASE_URL}/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, password, role }),
-  });
+    const res = await fetch(`${BASE_URL}/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password, role }),
+    });
 
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Registration failed");
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Registration failed");
 
-  return data; // { success, user }
-};
+    return data; // { success, user }
+  };
 
 
   const logout = async () => {
@@ -176,7 +191,7 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         tryRefresh,
-        register, 
+        register,
         redirectScreen,
         setRedirectScreen,
       }}

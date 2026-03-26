@@ -7,8 +7,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../hooks/useAuth";
+import baseApi from "../../api/api";
 
-const API_URL = "http://192.168.1.10:5000/api/surveys";
 
 export default function RequestSurvey() {
   const navigation = useNavigation();
@@ -24,7 +24,7 @@ export default function RequestSurvey() {
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const surveyOptions = [ /* same as yours */ "Property Survey", "Guideline Survey", "Land Survey", "Building Survey","Boundary Survey","Topographical Survey","Road and Bridge Surveys","Pipeline Surveys","Airport Surveys","Leveling Surveys","Property Partition","Contour Surveys","Building Settings out and Grid Line marking","Layout design and Stone Fixing","Layout Survey"];
+  const surveyOptions = [ /* same as yours */ "Property Survey", "Guideline Survey", "Land Survey", "Building Survey", "Boundary Survey", "Topographical Survey", "Road and Bridge Surveys", "Pipeline Surveys", "Airport Surveys", "Leveling Surveys", "Property Partition", "Contour Surveys", "Building Settings out and Grid Line marking", "Layout design and Stone Fixing", "Layout Survey"];
 
   useEffect(() => { if (user?.name) setName(user.name); }, [user]);
 
@@ -51,13 +51,14 @@ export default function RequestSurvey() {
         userId: user?.id || user?.uid || null,
       };
 
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
+      // const res = await fetch(API_URL, {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(payload),
+      // });
+      const res = await baseApi.post("/surveys", payload);
+      console.log("Survey submitted:", res);
+      const data = await res;
       setLoading(false);
 
       if (!res.ok) {
@@ -116,12 +117,12 @@ export default function RequestSurvey() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Choose Survey Type</Text>
-            <FlatList data={surveyOptions} keyExtractor={(i)=>i} renderItem={({item}) => (
-              <TouchableOpacity style={styles.modalItem} onPress={()=>{ setSurveyType(item); setModalVisible(false); }}>
+            <FlatList data={surveyOptions} keyExtractor={(i) => i} renderItem={({ item }) => (
+              <TouchableOpacity style={styles.modalItem} onPress={() => { setSurveyType(item); setModalVisible(false); }}>
                 <Text style={styles.modalItemText}>{item}</Text>
               </TouchableOpacity>
             )} />
-            <TouchableOpacity style={styles.modalCloseButton} onPress={()=>setModalVisible(false)}><Text style={styles.modalCloseText}>Cancel</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.modalCloseButton} onPress={() => setModalVisible(false)}><Text style={styles.modalCloseText}>Cancel</Text></TouchableOpacity>
           </View>
         </View>
       </Modal>

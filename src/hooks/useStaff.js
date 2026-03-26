@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import baseApi from "../api/api";
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 const StaffContext = createContext();
@@ -9,8 +10,8 @@ export const StaffProvider = ({ children }) => {
 
   const fetchStaff = async () => {
     try {
-      const res = await axios.get(`${API_URL}/staff`);
-      setStaffList(res.data);
+      const res = await baseApi.get("/staff");
+      setStaffList(res);
     } catch (err) {
       console.log(err);
     }
@@ -21,17 +22,22 @@ export const StaffProvider = ({ children }) => {
   }, []);
 
   const addStaff = async (staff) => {
-    const res = await axios.post(`${API_URL}/staff`, staff);
+    const res = await baseApi.post("/staff", staff);
     setStaffList((prev) => [...prev, res.data]);
   };
 
   const updateStaff = async (id, staff) => {
-    const res = await axios.put(`${API_URL}/${id}`, staff);
-    setStaffList((prev) => prev.map((s) => (s.id === id ? res.data : s)));
+    try {
+      console.log(id, staff)
+      const res = await baseApi.put(`/staff/${id}`, staff);
+      setStaffList((prev) => prev.map((s) => (s.id === id ? res.data : s)));
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const deleteStaff = async (id) => {
-    await axios.delete(`${API_URL}/staff/${id}`);
+    await baseApi.delete(`/staff/${id}`);
     setStaffList((prev) => prev.filter((s) => s.id !== id));
   };
 

@@ -1,32 +1,34 @@
-import React, {useState} from 'react';
-import {View, TextInput, Button, Alert} from 'react-native';
+import React, { useState } from 'react';
+import { View, TextInput, Button, Alert } from 'react-native';
 import { useAuth } from "../../hooks/useAuth";
 import axios from 'axios';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import baseApi from '../../api/api';
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function AddUser({ navigation }) {
   const { authHeaders } = useAuth();
-  const [name,setName] = useState('');
-  const [email,setEmail] = useState('');
-  const [password,setPassword] = useState('');
-  const [role,setRole] = useState('user');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('user');
 
   const submit = async () => {
     try {
-      await axios.post(`${API_URL}/users/admin/add`,
-        { name, email, password, role }, authHeaders());
+      // await axios.post(`${API_URL}/users/admin/add`,
+      //   { name, email, password, role }, authHeaders());
+      const res = await baseApi.post('/users/admin/add', { name, email, password, role });
       Alert.alert('Added');
       navigation.goBack();
     } catch (err) { Alert.alert('Error', err.response?.data?.message || err.message); }
   };
 
   return (
-    <SafeAreaView style={{padding:16}}>
-      <TextInput placeholder="Name" value={name} onChangeText={setName} style={{borderWidth:1, marginBottom:8}} />
-      <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={{borderWidth:1, marginBottom:8}} />
-      <TextInput placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} style={{borderWidth:1, marginBottom:8}} />
-      <TextInput placeholder="role (admin/user)" value={role} onChangeText={setRole} style={{borderWidth:1, marginBottom:8}} />
+    <SafeAreaView style={{ padding: 16 }}>
+      <TextInput placeholder="Name" value={name} onChangeText={setName} style={{ borderWidth: 1, marginBottom: 8 }} />
+      <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={{ borderWidth: 1, marginBottom: 8 }} />
+      <TextInput placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} style={{ borderWidth: 1, marginBottom: 8 }} />
+      <TextInput placeholder="role (admin/user)" value={role} onChangeText={setRole} style={{ borderWidth: 1, marginBottom: 8 }} />
       <Button title="Add" onPress={submit} />
     </SafeAreaView>
   );

@@ -14,21 +14,21 @@ const Drawer = createDrawerNavigator();
 export default function UserDrawer() {
   return (
     <Drawer.Navigator screenOptions={{ headerShown: false }}>
-      
+
       {/* Main app bottom tabs */}
-      <Drawer.Screen 
-        name="HomeTabs" 
+      <Drawer.Screen
+        name="HomeTabs"
         component={AppTabs}
         options={{ title: "Home" }}
       />
       <Drawer.Screen
-  name="UserStack"
-  component={UserStack}
-  options={{
-    title: "User Navigation",
-    drawerItemStyle: { display: "none" }   // 🔥 HIDE FROM DRAWER
-  }}
-/>
+        name="UserStack"
+        component={UserStack}
+        options={{
+          title: "User Navigation",
+          drawerItemStyle: { display: "none" }   // 🔥 HIDE FROM DRAWER
+        }}
+      />
 
 
       {/* Drawer Items */}

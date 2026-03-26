@@ -9,8 +9,8 @@ import {
   ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import baseApi from "../../api/api";
 
-const API_URL = "http://192.168.1.10:5000/api/";
 
 export default function WalletScreen({ route, navigation }) {
   const {
@@ -26,12 +26,11 @@ export default function WalletScreen({ route, navigation }) {
 
   const amount = 10;
 
- const createAppointment = async () => {
-  try {
-    const res = await fetch(`${API_URL}appointments`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+  const createAppointment = async () => {
+    try {
+
+
+      const res = await baseApi.post(`/appointments`, {
         userId: user.id,
         userName,
         contactNumber,
@@ -42,30 +41,29 @@ export default function WalletScreen({ route, navigation }) {
         location,
         notes,
         status: "Scheduled",
-      }),
-    });
+      });
 
-    const data = await res.json();
+      const data = res;
 
-    if (!res.ok) throw new Error(data.message || "Failed to book appointment");
+      if (!res.ok) throw new Error(data.message || "Failed to book appointment");
 
-    // Update user context so it appears in ProfileScreen immediately
-    setUser((prev) => ({
-      ...prev,
-      appointments: [...(prev.appointments || []), {
-        id: data.id,
-        survey: surveyType,
-        time: `${date} ${time}`,
-      }],
-    }));
+      // Update user context so it appears in ProfileScreen immediately
+      setUser((prev) => ({
+        ...prev,
+        appointments: [...(prev.appointments || []), {
+          id: data.id,
+          survey: surveyType,
+          time: `${date} ${time}`,
+        }],
+      }));
 
-    alert("Appointment booked successfully!");
-    navigation.navigate("Profile");
-  } catch (err) {
-    console.error(err);
-    alert("Failed to book appointment.");
-  }
-};
+      alert("Appointment booked successfully!");
+      navigation.navigate("Profile");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to book appointment.");
+    }
+  };
 
 
   return (

@@ -7,15 +7,15 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-
- 
-
+    "owner": "kgmukesh",
+    "plugins": [
+      "expo-notifications"
+    ],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.survey.surveyfrontend",
@@ -23,13 +23,14 @@
         "googleMapsApiKey": ""
       }
     },
-
     "android": {
       "package": "com.survey.surveyfrontend",
+      "googleServicesFile": "./google-services.json",
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION"
+        "ACCESS_BACKGROUND_LOCATION",
+        "android.permission.POST_NOTIFICATIONS"
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -42,14 +43,12 @@
         }
       }
     },
-
     "web": {
       "favicon": "./assets/favicon.png"
     },
-
     "extra": {
       "eas": {
-        "projectId": "d50db4d6-e71c-4ed0-8ca0-5f0f95348f76"
+        "projectId": "24f2b109-8fb2-4e1b-9aea-99f8c8dc5850"
       }
     }
   }
